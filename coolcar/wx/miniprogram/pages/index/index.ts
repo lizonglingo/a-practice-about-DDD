@@ -13,6 +13,7 @@ Page({
   bindViewTap() {
     wx.navigateTo({
       url: '../logs/logs',
+
     })
   },
   onLoad() {
@@ -42,6 +43,8 @@ Page({
         },
       })
     }
+
+    this.updateMotto()
   },
   getUserInfo(e: any) {
     console.log(e)
@@ -50,5 +53,27 @@ Page({
       userInfo: e.detail.userInfo,
       hasUserInfo: true,
     })
+  },
+  updateMotto() {
+
+    let shouldStop = false
+    setTimeout(() => {
+      shouldStop = true
+    }, 3000);
+
+    let count = 0
+    const update = () => {
+      count++
+      if (!shouldStop) {
+        this.setData({
+          motto: `Update count: ${count}`
+        }, () => {
+          update()
+        })
+      }
+    }
+
+    update()
+
   },
 })
