@@ -7,73 +7,46 @@ Page({
     motto: 'Hello World from TypeScript!!!',
     userInfo: {},
     hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    // canIUse: wx.canIUse('button.open-type.getUserInfo'),
   },
   // 事件处理函数
   bindViewTap() {
     wx.navigateTo({
       url: '../logs/logs',
-
     })
   },
   onLoad() {
-    if (app.globalData.userInfo) {
+    // 使用Promise重写通知
+    app.globalData.userInfo.then(userInfo => {
       this.setData({
-        userInfo: app.globalData.userInfo,
+        userInfo: userInfo,
         hasUserInfo: true,
       })
-    } else if (this.data.canIUse) {
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true,
-        })
-      }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true,
-          })
-        },
-      })
-    }
+    })
 
-    this.updateMotto()
+    // 原方法分别判断在页面load之前是否完成用户信息读取并进行判断
+    // 1. 完成读取的情况下直接赋值
+    // 2. 在没有完成读取的情况下使用回调函数再异步完成时进行通知
+    // if (app.globalData.userInfo) {
+    //   this.setData({
+    //     userInfo: app.globalData.userInfo,
+    //     hasUserInfo: true,
+    //   })
+    // } else {
+    //   // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
+    //   // 所以此处加入 callback 以防止这种情况
+    //   app.userInfoReadyCallback = res => {
+    //     this.setData({
+    //       userInfo: res.userInfo,
+    //       hasUserInfo: true,
+    //     })
+    //   }
+    // }
+
   },
   getUserInfo(e: any) {
     console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true,
-    })
-  },
-  updateMotto() {
-
-    let shouldStop = false
-    setTimeout(() => {
-      shouldStop = true
-    }, 3000);
-
-    let count = 0
-    const update = () => {
-      count++
-      if (!shouldStop) {
-        this.setData({
-          motto: `Update count: ${count}`
-        }, () => {
-          update()
-        })
-      }
-    }
-
-    update()
-
+    const userInfo: WechatMiniprogram.UserInfo = e.detail.userInfo
+    app.resolveUserInfo(userInfo)
   },
 })
