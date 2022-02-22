@@ -4,7 +4,7 @@ const app = getApp<IAppOption>()
 
 Page({
   data: {
-    motto: 'Hello World from TypeScript!!!',
+    motto: 'Hello World from TypeScript!',
     userInfo: {},
     hasUserInfo: false,
     // canIUse: wx.canIUse('button.open-type.getUserInfo'),
@@ -15,15 +15,27 @@ Page({
       url: '../logs/logs',
     })
   },
-  onLoad() {
-    // 使用Promise重写通知
-    app.globalData.userInfo.then(userInfo => {
-      this.setData({
-        userInfo: userInfo,
-        hasUserInfo: true,
-      })
+  async onLoad() {
+
+    // 通知版本 3
+    // 使用 async await重写通知
+    // 这里的 userInfo 就是一个 promise 对象
+    const userInfo = await app.globalData.userInfo
+    this.setData({
+      userInfo,
+      hasUserInfo: true
     })
 
+    // 通知版本 2
+    // 使用Promise重写通知
+    // app.globalData.userInfo.then(userInfo => {
+    //   this.setData({
+    //     userInfo: userInfo,
+    //     hasUserInfo: true,
+    //   })
+    // })
+
+    // 通知版本 1
     // 原方法分别判断在页面load之前是否完成用户信息读取并进行判断
     // 1. 完成读取的情况下直接赋值
     // 2. 在没有完成读取的情况下使用回调函数再异步完成时进行通知

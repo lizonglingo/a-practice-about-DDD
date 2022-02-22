@@ -11,7 +11,7 @@ App<IAppOption>({
       rejectUserInfo = reject
     })
   },
-  onLaunch() {
+  async onLaunch() {
     // 展示本地存储能力
     const logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
@@ -25,26 +25,39 @@ App<IAppOption>({
       },
     })
 
+    // 获取用户信息 版本3
+    // 使用 async await 语法糖获取用户信息
+    try {
+      const setting = await getSetting()
+      if (setting.authSetting['scope.userInfo']) {
+        const userInfoRes = await getUserInfo()
+        resolveUserInfo(userInfoRes.userInfo)
+      }
+    } catch (error) {
+      rejectUserInfo(error)
+    }
+
+
+    // 获取用户信息 版本2
     // 使用Promise改写用户信息
-    getSetting().then(res => {
-      if (res.authSetting['scope.userInfo']) {
-        return getUserInfo()
-      }
-      // 如果没有权限
-      return Promise.resolve(undefined)
-    }).then(res => {
-      // 如果没有权限自然拿不到用户信息，直接返回
-      if (!res) {
-        return
-      }
-      // 如果拿到信息就给出通知 已经拿到信息
-      resolveUserInfo(res.userInfo)
-    }).catch(err => rejectUserInfo(err))
+    // getSetting().then(res => {
+    //   if (res.authSetting['scope.userInfo']) {
+    //     return getUserInfo()
+    //   }
+    //   // 如果没有权限
+    //   return Promise.resolve(undefined)
+    // }).then(res => {
+    //   // 如果没有权限自然拿不到用户信息，直接返回
+    //   if (!res) {
+    //     return
+    //   }
+    //   // 如果拿到信息就给出通知 已经拿到信息
+    //   resolveUserInfo(res.userInfo)
+    // }).catch(err => rejectUserInfo(err))
 
 
-
-
-    // 获取用户信息
+    // 获取用户信息 原版 版本1
+    // 使用 callback 嵌套 callback 的方式获取用户信息
     // wx.getSetting({
     //   success: res => {
     //     if (res.authSetting['scope.userInfo']) {
