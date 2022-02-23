@@ -1,0 +1,12 @@
+<!-- pages/learncss/learncss.wxml -->
+<view class="container">
+    <text user-select wx:if="{{showPath}}">pages/learncss/learncss.wxml</text>
+    <block wx:else>
+        <text>learn css</text>
+    </block>
+    <view class="list">
+        <view class="item {{val.id%2?'blue':'red'}}" wx:for="{{values}}" wx:for-item="val" wx:key="id">
+            employee is {{val.name}}
+        </view>
+    </view>
+</view>
