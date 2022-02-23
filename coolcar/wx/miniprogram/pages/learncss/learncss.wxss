@@ -3,8 +3,10 @@ page {
     height: 100%;
 }
 
-.item {
-    font-size: x-large;
+.item.cu-avatar.xl {
+    width: unset;
+    padding-left: 20rpx;
+    padding-right: 20rpx;
 }
 
 .list {
@@ -17,7 +19,7 @@ page {
 }
 
 .blue {
-    color: blue;
+    color: blue; 
 }
 
 .red {

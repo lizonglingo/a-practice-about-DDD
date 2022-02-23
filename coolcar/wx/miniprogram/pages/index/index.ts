@@ -1,64 +1,108 @@
-// index.ts
-// 获取应用实例
-const app = getApp<IAppOption>()
-
 Page({
+  isPageShowing: false,
   data: {
-    motto: 'testing',
-    userInfo: {},
-    hasUserInfo: false,
-    // canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    setting: {
+      skew: 0,
+      rotate: 0,
+      showLocation: true,
+      showScale: true,
+      subKey: '',
+      layerStyle: 1,
+      enableZoom: true,
+      enableScroll: true,
+      enableRotate: false,
+      showCompass: false,
+      enable3D: false,
+      enableOverlooking: false,
+      enableSatellite: false,
+      enableTraffic: false,
+    },
+    location: {
+      latitude: 23.09,
+      longitude: 113.32,
+    },
+    scale: 10,
+    markers: [
+      {
+        iconPath: "/resources/car.png",
+        id: 0,
+        latitude: 23.09,
+        longitude: 113.32,
+        width: 30,
+        height: 30,
+      },
+      {
+        iconPath: "/resources/car.png",
+        id: 1,
+        latitude: 23.09,
+        longitude: 114.32,
+        width: 30,
+        height: 30,
+      }
+    ]
   },
-  // 事件处理函数
-  bindViewTap() {
-    wx.navigateTo({
-      url: '../logs/logs',
+
+  onShow() {
+    this.isPageShowing = true
+  },
+  onHide() {
+    this.isPageShowing = false
+  },
+
+  onMyLocationTap() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: res => {
+        this.setData({
+          location: {
+            latitude: res.latitude,
+            longitude: res.longitude,
+          },
+        })
+      },
+      fail: () => {
+        wx.showToast({
+          icon: 'none',
+          title: '如有需要，请前往设置页授权允许访问您的位置',
+        })
+      }
     })
   },
-  async onLoad() {
+  moveCars() {
+    const map = wx.createMapContext("map")
+    const dest = {
+      latitude: this.data.markers[0].latitude,
+      longitude: this.data.markers[0].longitude,
+    }
 
-    // 通知版本 3
-    // 使用 async await重写通知
-    // 这里的 userInfo 就是一个 promise 对象
-    const userInfo = await app.globalData.userInfo
-    this.setData({
-      userInfo,
-      hasUserInfo: true
-    })
+    const moveCar = () => {
+      dest.latitude += 0.1
+      dest.longitude += 0.1
+      let nowLa = dest.latitude
+      let nowLo = dest.longitude
+      
+      map.translateMarker({
+        destination: {
+          latitude: nowLa,
+          longitude: nowLo,
+        },
+        markerId: 0,
+        autoRotate: false,
+        rotate: 0,
+        duration: 5000,
+        animationEnd: () => {
+          if (this.isPageShowing) {
+            moveCar()
+          } else { 
+            this.setData({
+              'markers[0].latitude': nowLa,
+              'markers[0].longitude': nowLo,
+            })
+          }
+        },
+      })
+    }
 
-    // 通知版本 2
-    // 使用Promise重写通知
-    // app.globalData.userInfo.then(userInfo => {
-    //   this.setData({
-    //     userInfo: userInfo,
-    //     hasUserInfo: true,
-    //   })
-    // })
-
-    // 通知版本 1
-    // 原方法分别判断在页面load之前是否完成用户信息读取并进行判断
-    // 1. 完成读取的情况下直接赋值
-    // 2. 在没有完成读取的情况下使用回调函数再异步完成时进行通知
-    // if (app.globalData.userInfo) {
-    //   this.setData({
-    //     userInfo: app.globalData.userInfo,
-    //     hasUserInfo: true,
-    //   })
-    // } else {
-    //   // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-    //   // 所以此处加入 callback 以防止这种情况
-    //   app.userInfoReadyCallback = res => {
-    //     this.setData({
-    //       userInfo: res.userInfo,
-    //       hasUserInfo: true,
-    //     })
-    //   }
-    // }
-
-  },
-  getUserInfo(e: any) {
-    console.log(e)
-    const userInfo: WechatMiniprogram.UserInfo = e.detail.userInfo
-    app.resolveUserInfo(userInfo)
-  },
+    moveCar()
+  }
 })
