@@ -1,0 +1,27 @@
+<view class="container">
+    <view class="static">
+        <view style="width:700rpx;height:400rpx;">
+        <image src="/resources/sedan.png" style="width:100%;height: 100%;" />
+    </view>
+    <view>
+        <view style="font-size:35rpx;">道路千万条，安全第一条。</view>
+        <view style="font-size:35rpx;" class="margin-top-xs">请将车辆停放在车位中。</view>
+    </view>
+    </view>
+    
+    <view class="avatar-container">
+        <button wx:if="{{!avatarUrl}}" class="cu-avatar round lg bg-grey margin-xs"
+        open-type="getUserInfo"
+        bindgetuserinfo="onGetUserInfo">
+            <text class="cuIcon-people"></text>
+        </button>
+        <view wx:if="{{avatarUrl}}" class="switch-container">
+                <image src="{{avatarUrl}}" class="cu-avatar round lg bg-grey margin-xs"/>
+        </view>
+        <view wx:if="{{avatarUrl}}">
+            <switch bindchange="onShareLocation" checked="{{shareLocation}}"/>
+        </view>
+        <view class="margin-top-xl" style="font-size:35rpx">实时展示我的头像</view>
+    </view>
+    <button class="cu-btn bg-green lg" style="width: 80%">立即开锁</button>
+</view>

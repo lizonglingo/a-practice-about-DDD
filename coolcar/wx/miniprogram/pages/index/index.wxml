@@ -10,16 +10,19 @@
   markers="{{markers}}"
 >
   <cover-view class="icon-container">
-    <cover-image 
+    <cover-image
+      wx:if="{{!avatarURL}}" 
       src="/resources/account.png"
       ></cover-image>
-    <cover-image 
-      src="/resources/my_location.png"
+    <cover-image
+      wx:if="{{avatarURL}}" 
+      src="{{avatarURL}}"
+      class="round"
       bindtap="onMyLocationTap"
     ></cover-image>
   </cover-view>
 
   <cover-view class="btn-container bg-grey round">
-    <cover-view bindtap="moveCars">扫码租车</cover-view>
+    <cover-view bindtap="onScanClicked">扫码租车</cover-view>
   </cover-view>
 </map>

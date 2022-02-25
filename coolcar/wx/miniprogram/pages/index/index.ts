@@ -1,6 +1,7 @@
 Page({
   isPageShowing: false,
   data: {
+    avatarURL: '',
     setting: {
       skew: 0,
       rotate: 0,
@@ -40,6 +41,25 @@ Page({
         height: 30,
       }
     ]
+  },
+
+  async onLoad(){
+    const userInfo = await getApp<IAppOption>().globalData.userInfo
+    this.setData({
+      avatarURL: userInfo.avatarUrl,
+    })
+  },
+
+  onScanClicked() {
+    wx.scanCode({
+      success: () =>{
+        wx.navigateTo({
+          url: '/pages/register/register',
+        })
+      },
+      fail: console.error,
+    })
+
   },
 
   onShow() {

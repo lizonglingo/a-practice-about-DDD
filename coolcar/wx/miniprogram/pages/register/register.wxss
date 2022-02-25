@@ -1,0 +1,49 @@
+.lic-tmpl {
+    width: 650rpx;
+    height: 450rpx;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lic-tmpl-img {
+    opacity: .3;
+    position: absolute;
+}
+
+.stretch {
+    width: 100%;
+    height: 100%;
+}
+
+
+.cuIcon-camerafill {
+    font-size: 200rpx;
+}
+
+.instruction {
+    position: absolute;
+    bottom: -75rpx;
+}
+
+.lic-form {
+    width: 650rpx;
+}
+
+.cu-form-group .title {
+    min-width: calc(4em + 30rpx);
+  }
+
+.verified-mark-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+}
+
+.verified-mark {
+    width: 200rpx;
+    height: 200rpx;
+    opacity: .5;
+}
+
