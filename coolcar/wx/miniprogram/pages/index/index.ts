@@ -50,11 +50,14 @@ Page({
     })
   },
 
-  onScanClicked() {
+  onScanTap() {
     wx.scanCode({
       success: () =>{
+        // TODO: get car id from scan result
+        const carID = 'car123'
+        const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
         wx.navigateTo({
-          url: '/pages/register/register',
+          url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
         })
       },
       fail: console.error,

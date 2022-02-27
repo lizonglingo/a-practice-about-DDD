@@ -12,7 +12,8 @@ Page({
         fee: '0.00',
     },
 
-    onLoad() {
+    onLoad(opt) {
+        console.log('current trip', opt.trip_id)
         this.setupLocationUpdator()
         this.setupTimer()
     }, 

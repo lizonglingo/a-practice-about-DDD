@@ -1,4 +1,5 @@
 Page({
+    redirectURL: '',
     data: {
         licNo: '',
         name: '',
@@ -8,6 +9,13 @@ Page({
         licImgURL: '',
         state: 'UNSUBMITTED' as 'UNSUBMITTED' | 'PENDING' | 'VERIFIED'
     },
+
+    onLoad(opt) {
+        if (opt.redirect) {
+            this.redirectURL = decodeURIComponent(opt.redirect)
+        }
+    },
+
     onUploadLic() {
         wx.chooseImage({
             success: res => {
@@ -62,8 +70,11 @@ Page({
         this.setData({
             state: 'VERIFIED',
         })
-        wx.redirectTo({
-            url: '/pages/lock/lock',
-        })
+        if (this.redirectURL) {
+           wx.redirectTo({
+            url: this.redirectURL,
+            }) 
+        }
+        
     }
 })

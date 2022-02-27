@@ -19,6 +19,6 @@
   </cover-view>
 
   <cover-view class="btn-container bg-grey round">
-    <cover-view bindtap="onScanClicked">扫码租车</cover-view>
+    <cover-view bindtap="onScanTap">扫码租车</cover-view>
   </cover-view>
 </map>
