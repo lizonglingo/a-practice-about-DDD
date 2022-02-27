@@ -30,6 +30,20 @@
           "name": "",
           "pathName": "pages/lock/lock",
           "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "",
+          "pathName": "pages/driving/driving",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "",
+          "pathName": "pages/mytrips/mytrips",
+          "query": "",
           "scene": null,
           "launchMode": "default"
         }

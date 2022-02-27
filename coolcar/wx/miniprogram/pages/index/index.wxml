@@ -11,15 +11,11 @@
 >
   <cover-view class="icon-container">
     <cover-image
-      wx:if="{{!avatarURL}}" 
-      src="/resources/account.png"
-      ></cover-image>
-    <cover-image
-      wx:if="{{avatarURL}}" 
-      src="{{avatarURL}}"
+      src="{{avatarURL?avatarURL:'/resources/account.png'}}"
       class="round"
-      bindtap="onMyLocationTap"
+      bindtap="onMyTrips"
     ></cover-image>
+    <cover-image src="/resources/my_location.png" bindtap="onMyLocationTap"></cover-image>
   </cover-view>
 
   <cover-view class="btn-container bg-grey round">

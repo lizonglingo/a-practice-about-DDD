@@ -1,0 +1,21 @@
+<view class="container">
+    <view class="pannel">
+        <view class="time">
+            <text class="cuIcon-timefill lg text-orange"></text>
+            <view>{{elapsed}}</view>
+        </view>
+        <view class="fee">
+            <text class="cuIcon-moneybagfill lg text-green"></text>
+            <view >行程费用: {{fee}}元</view>
+        </view>
+        <button class="cu-btn bg-red margin-tb-xl lg button-hover"style="width:70%">结束行程</button>
+    </view>
+
+    <map 
+    id="map"
+    latitude="{{location.latitude}}"
+    longitude="{{location.longitude}}"
+    show-location
+    scale="{{scale}}" 
+/>
+</view>

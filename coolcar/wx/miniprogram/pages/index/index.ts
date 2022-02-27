@@ -69,6 +69,12 @@ Page({
     this.isPageShowing = false
   },
 
+  onMyTrips() {
+    wx.navigateTo({
+      url: '/pages/mytrips/mytrips',
+    })
+  },
+
   onMyLocationTap() {
     wx.getLocation({
       type: 'gcj02',
