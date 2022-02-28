@@ -1,29 +1,41 @@
-<swiper 
-    indicator-dots="{{indicatorDots}}"
-    autoplay="{{autoplay}}"
-    interval="{{interval}}"
-    duration="{{duration}}"
-    circular="{{circular}}"
-    display-multiple-items="1"
-    vertical="{{vertical}}"
-    current="{{current}}"
-    bindchange="onSwiperChange"
->
-    <swiper-item wx:for="{{promotionItems}}" wx:key="promotionID" 
-    bindtap="onPromotionItemTap"
-    data-promotion-id="{{item.promotionID}}">
-        <image class="swiper-image" src="{{item.img}}"/>
-    </swiper-item>
-</swiper>
-<view class="avatar-container margin-right-xl margin-top-sm">
-    <view class="avatar margin-right">
-            <button wx:if="{{!avatarURL}}" class="cu-avatar round lg bg-grey margin-xs"
-                open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
-                <text class="cuIcon-people"></text>
-            </button>
-            <image wx:if="{{avatarURL}}" class="cu-avatar round lg bg-grey margin-xs"
-                src="{{avatarURL}}"/>
-        </view>
-    <view class="text-blue" bindtap="onRegisterTap">驾驶资格未认证</view>
-    
+<view id="heading" class="padding-bottom-xs">
+    <swiper 
+        indicator-dots="{{indicatorDots}}"
+        autoplay="{{autoplay}}"
+        interval="{{interval}}"
+        duration="{{duration}}"
+        circular="{{circular}}"
+        display-multiple-items="1"
+        vertical="{{vertical}}"
+        current="{{current}}"
+        bindchange="onSwiperChange"
+    >
+        <swiper-item wx:for="{{promotionItems}}" wx:key="promotionID" 
+        bindtap="onPromotionItemTap"
+        data-promotion-id="{{item.promotionID}}">
+            <image class="swiper-image" src="{{item.img}}"/>
+        </swiper-item>
+    </swiper>
+    <view class="avatar-container margin-right-xl margin-top-sm">
+        <view class="avatar margin-right">
+                <button wx:if="{{!avatarURL}}" class="cu-avatar round lg bg-grey margin-xs"
+                    open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
+                    <text class="cuIcon-people"></text>
+                </button>
+                <image wx:if="{{avatarURL}}" class="cu-avatar round lg bg-grey margin-xs"
+                    src="{{avatarURL}}"/>
+            </view>
+        <view class="text-blue" bindtap="onRegisterTap">驾驶资格未认证</view>
+    </view>
 </view>
+<scroll-view scroll-y="{{true}}" scroll-with-animation="{{true}}" enable-back-to-top="{{true}}"
+style="height:{{tripsHeight}}px">
+    <view wx:for="{{trips}}" wx:key="id" class="trip">
+        <view class="cu-bar solid-bottom bg-white">
+            <view class="action">
+                <text class="cuIcon-title text-green"></text>
+                {{item.id}}
+            </view>
+        </view>
+    </view>
+</scroll-view>

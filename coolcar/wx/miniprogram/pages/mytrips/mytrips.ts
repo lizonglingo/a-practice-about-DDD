@@ -1,5 +1,14 @@
 import { routing } from "../../utils/routing"
 
+interface Trip {
+    id: string
+    start: string
+    end: string
+    duration: string
+    fee: string
+    distance: string
+}
+
 Page({
     data: {
         indicatorDots: true,
@@ -31,6 +40,32 @@ Page({
                 promotionID: '5',
             },
         ],
+        avatarURL: '',
+        trips: [] as Trip [],
+    },
+    async onLoad() {
+        this.populateTrips()
+        const userInfo = await getApp<IAppOption>().globalData.userInfo
+        this.setData({
+            avatarURL: userInfo.avatarUrl,
+        })
+    },
+
+    populateTrips(){
+        const trips: Trip[] = []
+        for (let i=0; i<100; i++) {
+            trips.push({
+                id: (10001+i).toString(),
+                start: '长桥',
+                end: '宿舍',
+                distance: '2.4公里',
+                duration: '0时12分钟',
+                fee: '5.2元'
+            })
+        }
+        this.setData({
+            trips: trips,
+        })
     },
 
     onSwiperChange(e: any) {
@@ -46,5 +81,15 @@ Page({
             // url: '/pages/register/register',
             url: routing.register(),
         })
-    }
+    },
+    onGetUserInfo(e: any) {
+        const userInfo: WechatMiniprogram.UserInfo = e.detail.userInfo
+        if (userInfo) {
+            getApp<IAppOption>().resolveUserInfo(userInfo)
+            this.setData({
+                avatarURL: userInfo.avatarUrl,
+            })
+        }
+
+    },
 })
