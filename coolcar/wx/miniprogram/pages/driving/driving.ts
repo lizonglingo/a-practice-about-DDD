@@ -1,3 +1,5 @@
+import { routing } from "../../utils/routing"
+
 const centPerSec = 0.7
 
 Page({
@@ -12,8 +14,9 @@ Page({
         fee: '0.00',
     },
 
-    onLoad(opt) {
-        console.log('current trip', opt.trip_id)
+    onLoad(opt: Record<'trip_id', string>) {
+        const o: routing.DrivingOpts = opt
+        console.log('current trip', o.trip_id)
         this.setupLocationUpdator()
         this.setupTimer()
     }, 

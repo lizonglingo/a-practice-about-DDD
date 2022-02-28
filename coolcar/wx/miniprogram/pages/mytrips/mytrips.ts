@@ -1,3 +1,5 @@
+import { routing } from "../../utils/routing"
+
 Page({
     data: {
         indicatorDots: true,
@@ -41,7 +43,8 @@ Page({
 
     onRegisterTap() {
         wx.navigateTo({
-            url: '/pages/register/register',
+            // url: '/pages/register/register',
+            url: routing.register(),
         })
     }
 })

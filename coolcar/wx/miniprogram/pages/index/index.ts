@@ -1,3 +1,5 @@
+import { routing } from "../../utils/routing"
+
 Page({
   isPageShowing: false,
   data: {
@@ -55,9 +57,15 @@ Page({
       success: () =>{
         // TODO: get car id from scan result
         const carID = 'car123'
-        const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
+        // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
+        const redirectURL: string = routing.lock({
+          car_id: carID,
+        })
         wx.navigateTo({
-          url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
+          // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
+          url: routing.register({
+            redirectURL: redirectURL,
+          })
         })
       },
       fail: console.error,
@@ -74,7 +82,8 @@ Page({
 
   onMyTrips() {
     wx.navigateTo({
-      url: '/pages/mytrips/mytrips',
+      // url: '/pages/mytrips/mytrips',
+      url: routing.mytrips(),
     })
   },
 
