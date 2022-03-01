@@ -17,3 +17,44 @@ swiper {
     align-items: center;
     justify-content: flex-end;
 }
+
+.mytrips-heading {
+    position: absolute;
+    left: 50rpx;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.trip-detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-container {
+    display: flex;
+}
+
+.nav-container swiper {
+    width: 200rpx;
+}
+
+.cur {
+    width: 8rpx;
+    border-radius: 10rpx 0 0 10rpx;
+    position: absolute;
+    background-color: currentColor;
+    top: 0;
+    right: 0rpx;
+    bottom: 0;
+    margin: auto;
+}
+
+.nav .cu-item {
+    margin: unset;
+    padding: unset;
+    height: 90rpx;
+    display: inline-block;
+    line-height: 90rpx;
+    text-align: center;
+}

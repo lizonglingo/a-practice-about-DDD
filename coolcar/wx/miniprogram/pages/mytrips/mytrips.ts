@@ -7,9 +7,35 @@ interface Trip {
     duration: string
     fee: string
     distance: string
+    status: string
+}
+
+interface MainItem {
+    id: string
+    navId: string
+    navScrollId: string
+    data: Trip
+}
+
+interface NavItem {
+    id: string
+    mainId: string
+    label: string
+}
+
+interface MainItemQueryRequest {
+    id: string
+    top: number
+    dataset: {
+        navId: string
+        navScrollId: string
+    }
 }
 
 Page({
+    scrollStates: {
+        mainItems: [] as MainItemQueryRequest[],
+    },
     data: {
         indicatorDots: true,
         vertical: false,
@@ -41,7 +67,13 @@ Page({
             },
         ],
         avatarURL: '',
-        trips: [] as Trip [],
+        tripsHeight: 0,
+        mainItems: [] as MainItem[],
+        navItems: [] as NavItem[],
+        navCount: 0,
+        mainScroll: '',
+        navSel: '',
+        navScroll: '',
     },
     async onLoad() {
         this.populateTrips()
@@ -50,21 +82,66 @@ Page({
             avatarURL: userInfo.avatarUrl,
         })
     },
-
+    onReady() {
+        wx.createSelectorQuery().select('#heading')
+        .boundingClientRect(rect => {
+            const height = wx.getSystemInfoSync().windowHeight - rect.height,
+            this.setData({
+                tripsHeight: height,
+                navCount: Math.round(height/50),
+            })
+        }).exec()
+    },
     populateTrips(){
-        const trips: Trip[] = []
+        const mainItems: MainItem[] = []
+        const navItems: NavItem[] = []
+        let navSel = ''
+        let prevNav = ''
         for (let i=0; i<100; i++) {
-            trips.push({
+            if(!prevNav) {
+                prevNav = 'nav-' + i
+            }
+            mainItems.push({
+                id: 'main-' + i,
+                navId: 'nav-' + i,
+                navScrollId: prevNav,
+                data: {
                 id: (10001+i).toString(),
                 start: '长桥',
                 end: '宿舍',
                 distance: '2.4公里',
                 duration: '0时12分钟',
-                fee: '5.2元'
+                fee: '5.2元',
+                status: '已完成',
+                }
             })
+            navItems.push({
+                id: 'nav-' + i,
+                mainId: 'main-' + i,
+                label: (10001+i).toString(),
+            })
+            if (i===0) {
+                navSel = 'nav-' + i
+            }
+            prevNav = 'nav-' + i
         }
         this.setData({
-            trips: trips,
+            mainItems: mainItems,
+            navItems: navItems,
+            navSel: navSel,
+        }, () => {
+            this.prepareScrollStates()
+        })
+    },
+
+    prepareScrollStates() {
+        wx.createSelectorQuery().selectAll('.main-item')
+        .fields({
+            id: true,
+            dataset: true,
+            rect: true
+        }).exec( res => {
+            this.scrollStates.mainItems = res[0]
         })
     },
 
@@ -92,4 +169,28 @@ Page({
         }
 
     },
+    onNavItemTap(e: any) {
+        const mainId: string = e.currentTarget?.dataset?.mainId
+        const navId: string = e.currentTarget?.id
+        if (mainId) {
+            this.setData({
+                mainScroll: mainId,
+                navSel: navId,
+            })
+        }
+    },
+    onMainScroll(e: any) {
+        const top: number = e.currentTarget?.offsetTop + e.detail?.scrollTop
+        if (top === undefined) {
+            return
+        }
+        const selItem =  this.scrollStates.mainItems.find( v => v.top >= top)
+        if (!selItem) {
+            return
+        }
+        this.setData({
+            navSel: selItem.dataset.navId,
+            navScroll: selItem.dataset.navScrollId,
+        })
+    }
 })
