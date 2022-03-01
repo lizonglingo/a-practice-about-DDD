@@ -45,7 +45,7 @@ Page({
     ]
   },
 
-  async onLoad(){
+  async onLoad() {
     const userInfo = await getApp<IAppOption>().globalData.userInfo
     this.setData({
       avatarURL: userInfo.avatarUrl,
@@ -54,18 +54,27 @@ Page({
 
   onScanTap() {
     wx.scanCode({
-      success: () =>{
-        // TODO: get car id from scan result
-        const carID = 'car123'
-        // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
-        const redirectURL: string = routing.lock({
-          car_id: carID,
-        })
-        wx.navigateTo({
-          // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
-          url: routing.register({
-            redirectURL: redirectURL,
-          })
+      success: () => {
+        wx.showModal({
+          title: '身份认证',
+          content: '认证后方可租车',
+          success: (res) => {
+            if (res.confirm) {
+              // TODO: get car id from scan result
+              const carID = 'car123'
+              // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
+              const redirectURL: string = routing.lock({
+                car_id: carID,
+              })
+              wx.navigateTo({
+                // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
+                url: routing.register({
+                  redirectURL: redirectURL,
+                })
+              })
+            }
+          },
+
         })
       },
       fail: console.error,
@@ -118,7 +127,7 @@ Page({
       dest.longitude += 0.1
       let nowLa = dest.latitude
       let nowLo = dest.longitude
-      
+
       map.translateMarker({
         destination: {
           latitude: nowLa,
@@ -131,7 +140,7 @@ Page({
         animationEnd: () => {
           if (this.isPageShowing) {
             moveCar()
-          } else { 
+          } else {
             this.setData({
               'markers[0].latitude': nowLa,
               'markers[0].longitude': nowLo,
