@@ -1,3 +1,4 @@
+import { IAppOption } from "../../appoption"
 import { routing } from "../../utils/routing"
 
 interface Trip {
@@ -85,7 +86,7 @@ Page({
     onReady() {
         wx.createSelectorQuery().select('#heading')
         .boundingClientRect(rect => {
-            const height = wx.getSystemInfoSync().windowHeight - rect.height,
+            const height = wx.getSystemInfoSync().windowHeight - rect.height
             this.setData({
                 tripsHeight: height,
                 navCount: Math.round(height/50),

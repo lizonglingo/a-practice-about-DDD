@@ -6,7 +6,7 @@ import (
 )
 
 type Service struct {
-	trippb.UnimplementedTripServiceServer
+	trippb.UnimplementedTripServiceServer	// 将该对象绑定，才能实现 pb 的接口
 }
 
 func (*Service) GetTrip(ctx context.Context, request *trippb.GetTripRequest) (*trippb.GetTripResponse, error) {
