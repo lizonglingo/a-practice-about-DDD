@@ -7,17 +7,24 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type Service struct {
-	Logger         *zap.Logger    // 用来记录日志
-	Mongo          *dao.Mongo     // 使用数据库的表 account
+	Logger         *zap.Logger // 用来记录日志
+	Mongo          *dao.Mongo  // 使用数据库的表 account
+	TokenGenerator TokenGenerator
+	TokenExpire time.Duration
 	OpenIDResolver OpenIDResolver // 用来将获取到的 Request 中的 code 转化为 openId
 	authpb.UnimplementedAuthServiceServer
 }
 
 type OpenIDResolver interface {
 	Resolve(code string) (string, error) // use code get openId
+}
+
+type TokenGenerator interface {
+	GenerateToken(accountID string, expire time.Duration) (string, error)
 }
 
 func (s *Service) Login(ctx context.Context, request *authpb.LoginRequest) (*authpb.LoginResponse, error) {
@@ -33,8 +40,14 @@ func (s *Service) Login(ctx context.Context, request *authpb.LoginRequest) (*aut
 		return nil, status.Errorf(codes.Internal, "")
 	}
 
+	tkn, err := s.TokenGenerator.GenerateToken(accountID, s.TokenExpire)
+	if err != nil {
+		s.Logger.Error("cannot generate token", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "")
+	}
+
 	return &authpb.LoginResponse{
-		AccessToken: "token for account id is " + accountID,
-		ExpiresIn:   7200,
+		AccessToken: tkn,
+		ExpiresIn:   int32(s.TokenExpire.Seconds()),
 	}, nil
 }
