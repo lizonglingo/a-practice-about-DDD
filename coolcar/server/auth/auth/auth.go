@@ -14,7 +14,7 @@ type Service struct {
 	Logger         *zap.Logger // 用来记录日志
 	Mongo          *dao.Mongo  // 使用数据库的表 account
 	TokenGenerator TokenGenerator
-	TokenExpire time.Duration
+	TokenExpire    time.Duration
 	OpenIDResolver OpenIDResolver // 用来将获取到的 Request 中的 code 转化为 openId
 	authpb.UnimplementedAuthServiceServer
 }
@@ -34,7 +34,7 @@ func (s *Service) Login(ctx context.Context, request *authpb.LoginRequest) (*aut
 		return nil, status.Errorf(codes.Unavailable, "cannot resolve openID: %v\n", err)
 	}
 
-	accountID, err := s.Mongo.ResolveAccountID(ctx, openID)
+	accountID, err := s.Mongo.ResolveAccountID(ctx, openID) // openID 对应 mongo 中的 object.id 就是 accountID
 	if err != nil {
 		s.Logger.Error("cannot resolve account id", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "")
