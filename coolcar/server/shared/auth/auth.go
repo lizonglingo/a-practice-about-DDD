@@ -73,7 +73,7 @@ func (i *interceptor) HandleRequest(ctx context.Context,
 	// 验证token 获取accountID
 	// 将 accountID 放进context
 	// 把 新的context传下去 才真正交给 trip 的 createTrip执行
-	return handler(ContextWithAccountID(ctx, accountID), req)
+	return handler(ContextWithAccountID(ctx, AccountID(accountID)), req)
 }
 
 // tokenFromContext 从context中拿到token并返回.
@@ -99,17 +99,21 @@ type accountIDKey struct {
 
 }
 
+type AccountID string
 
+func (a AccountID) String() string {
+	return string(a)
+}
 
 // ContextWithAccountID 将accountID写入context.
-func ContextWithAccountID(c context.Context, aid string) context.Context {
+func ContextWithAccountID(c context.Context, aid AccountID) context.Context {
 	return context.WithValue(c, accountIDKey{}, aid)
 }
 
 // AccountIDFromContext 从context中将accountID取出.
-func AccountIDFromContext(c context.Context) (string, error) {
+func AccountIDFromContext(c context.Context) (AccountID, error) {
 	v := c.Value(accountIDKey{})
-	aid, ok:= v.(string)
+	aid, ok:= v.(AccountID)
 	if !ok {
 		return "", status.Error(codes.Unauthenticated, "")
 	}
