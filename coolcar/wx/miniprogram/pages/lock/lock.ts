@@ -1,4 +1,5 @@
 import { IAppOption } from "../../appoption"
+import { TripService } from "../../service/trip"
 import { routing } from "../../utils/routing"
 
 const shareLocationKey = "share_location"
@@ -44,6 +45,11 @@ Page({
                     // TODO: 需要双向绑定
                     avatarURL: this.data.shareLocation ? this.data.avatarURL : '',
                 })
+
+                TripService.CreateTrip({
+                    start: 'abccc',
+                })
+                return      // 暂时return避免页面跳转带来问题
                 const tripID = 'trip123'
 
                     wx.showLoading({
