@@ -40,7 +40,7 @@ func (s *Service) Login(ctx context.Context, request *authpb.LoginRequest) (*aut
 		return nil, status.Errorf(codes.Internal, "")
 	}
 
-	tkn, err := s.TokenGenerator.GenerateToken(accountID, s.TokenExpire)
+	tkn, err := s.TokenGenerator.GenerateToken(accountID.String(), s.TokenExpire)
 	if err != nil {
 		s.Logger.Error("cannot generate token", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "")

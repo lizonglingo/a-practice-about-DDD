@@ -49,7 +49,7 @@ Page({
                 TripService.CreateTrip({
                     start: 'abccc',
                 })
-                return      // 暂时return避免页面跳转带来问题
+                // return      // 暂时return避免页面跳转带来问题
                 const tripID = 'trip123'
 
                     wx.showLoading({

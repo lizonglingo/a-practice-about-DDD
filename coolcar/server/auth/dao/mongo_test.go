@@ -2,7 +2,9 @@ package dao
 
 import (
 	"context"
+	"coolcar/shared/id"
 	mgo "coolcar/shared/mongo"
+	"coolcar/shared/mongo/objid"
 	mongotesting "coolcar/shared/testing"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,12 +32,12 @@ func TestMongo_ResolveAccountID(t *testing.T) {
 	m := NewMongo(mc.Database("coolcar"))
 	_, err = m.col.InsertMany(c, []interface{}{
 		bson.M{
-			mgo.IDField: mustObjID("6223554ecd96314f99e7e088"),
-			openIDField: "open_id_1",
+			mgo.IDFieldName: objid.MustFromID(id.AccountID("6223554ecd96314f99e7e088")),
+			openIDField:     "open_id_1",
 		},
 		bson.M{
-			mgo.IDField: mustObjID("6223554ecd96314f99e7e09a"),
-			openIDField: "open_id_2",
+			mgo.IDFieldName: objid.MustFromID(id.AccountID("6223554ecd96314f99e7e09a")),
+			openIDField:     "open_id_2",
 		},
 	})
 	if err != nil {
@@ -43,8 +45,8 @@ func TestMongo_ResolveAccountID(t *testing.T) {
 	}
 
 	// 为新用户设置的 objID
-	m.newObjID = func() primitive.ObjectID {
-		return mustObjID("6223554ecd96314f99e7e09b")
+	mgo.NewObjID = func() primitive.ObjectID {
+		return objid.MustFromID(id.AccountID("6223554ecd96314f99e7e09b"))
 	}
 
 	// 测试数据
@@ -77,18 +79,10 @@ func TestMongo_ResolveAccountID(t *testing.T) {
 			if err != nil {
 				t.Errorf("fail resolve open_id for %q: %v", c.openID, err)
 			}
-			if objID != c.want {
+			if objID.String() != c.want {
 				t.Errorf("resolve account id: want: %q, got: %q\n", c.want, objID)
 			}
 		})
 	}
 
-}
-
-func mustObjID(hex string) primitive.ObjectID {
-	objID, err := primitive.ObjectIDFromHex(hex)
-	if err != nil {
-		panic(err)
-	}
-	return objID
 }
