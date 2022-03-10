@@ -1,7 +1,4 @@
-import camelcaseKeys = require("camelcase-keys")
 import { IAppOption } from "./appoption"
-import { auth } from "./service/proto_gen/auth/auth_pb"
-import { rental } from "./service/proto_gen/rental/rental_pb"
 import { Coolcar } from "./service/request"
 import { getSetting, getUserInfo } from "./utils/wxapi"
 

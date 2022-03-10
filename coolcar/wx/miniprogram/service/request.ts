@@ -50,6 +50,7 @@ export namespace Coolcar {
     export async function login() {
         // 如果token有效 直接发业务请求 不用再login
         if (authData.token && authData.expiryMs >= Date.now()) {
+            console.log('has token and expiry > now')
             return
         }
 
