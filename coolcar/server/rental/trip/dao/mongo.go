@@ -14,6 +14,7 @@ import (
 const (
 	tripField = "trip"
 	accountIDField = tripField + ".accountid"
+	statusField = tripField + ".status"
 )
 
 type Mongo struct {
@@ -34,9 +35,6 @@ type TripRecord struct {
 	Trip                  *rentalpb.Trip  `bson:"trip"`
 }
 
-// TODO: 同一个account最多只能有一个进行中的Trip
-// TODO: 强类型化tripID
-// TODO: 表格驱动测试
 
 func (m *Mongo) CreateTrip(c context.Context, trip *rentalpb.Trip) (*TripRecord, error) {
 	r := &TripRecord{
@@ -75,4 +73,32 @@ func (m *Mongo) GetTrip(c context.Context, id id.TripID, accountID id.AccountID)
 	}
 
 	return &tr, nil
+}
+
+// GetTrips 获取某个用户 某个状态？ 的所有行程.
+func (m *Mongo) GetTrips(c context.Context, accountID id.AccountID, status rentalpb.TripStatus) ([]*TripRecord, error) {
+	// 定义查找约束
+	filter := bson.M{
+		accountIDField: accountID.String(),
+	}
+
+	if status != rentalpb.TripStatus_TS_NOT_SPECIFIED {
+		filter[statusField] = status
+	}
+
+	res, err := m.col.Find(c, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var tripRecords []*TripRecord
+	for res.Next(c) {
+		var trip TripRecord
+		err := res.Decode(&trip)
+		if err != nil {
+			return nil, err
+		}
+		tripRecords = append(tripRecords, &trip)
+	}
+	return tripRecords, nil
 }

@@ -8,6 +8,7 @@ require (
 	github.com/docker/distribution v2.8.0+incompatible // indirect
 	github.com/docker/docker v20.10.12+incompatible
 	github.com/docker/go-connections v0.4.0
+	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
 	github.com/medivhzhan/weapp/v2 v2.4.2
 	github.com/opencontainers/image-spec v1.0.2 // indirect

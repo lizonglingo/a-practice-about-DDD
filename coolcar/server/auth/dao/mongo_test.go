@@ -7,9 +7,6 @@ import (
 	"coolcar/shared/mongo/objid"
 	mongotesting "coolcar/shared/testing"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"testing"
 )
@@ -18,12 +15,12 @@ import (
 var mongoURI string
 
 func TestMain(m *testing.M) {
-	os.Exit(mongotesting.RunWithMongoInDocker(m, &mongoURI))
+	os.Exit(mongotesting.RunWithMongoInDocker(m))
 }
 
 func TestMongo_ResolveAccountID(t *testing.T) {
 	c := context.Background()
-	mc, err := mongo.Connect(c, options.Client().ApplyURI(mongoURI))
+	mc, err := mongotesting.NewClient(c)
 	if err != nil {
 		t.Fatalf("cannot connect mongodb: %v\n", err)
 	}
@@ -45,9 +42,7 @@ func TestMongo_ResolveAccountID(t *testing.T) {
 	}
 
 	// 为新用户设置的 objID
-	mgo.NewObjID = func() primitive.ObjectID {
-		return objid.MustFromID(id.AccountID("6223554ecd96314f99e7e09b"))
-	}
+	mgo.NewObjectIDWithValue(id.AccountID("6223554ecd96314f99e7e09b"))
 
 	// 测试数据
 	cases := [] struct{
