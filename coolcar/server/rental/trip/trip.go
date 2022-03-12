@@ -38,6 +38,7 @@ func (s *Service) UpdateTrip(ctx context.Context, request *rentalpb.UpdateTripRe
 	}
 
 	tid := id.TripID(request.Id)
+	// 1. 试想，发生写冲突，请求A和请求B读出同一状态a的Trip，记为Trip_a
 	tr, err := s.Mongo.GetTrip(ctx, tid, aid)
 
 	if request.Current != nil {	// 说明当前位置变了
@@ -47,7 +48,9 @@ func (s *Service) UpdateTrip(ctx context.Context, request *rentalpb.UpdateTripRe
 		tr.Trip.End = tr.Trip.Current
 		tr.Trip.Status = rentalpb.TripStatus_FINISHED
 	}
-
+	// 2. 请求A发生了一些问题，导致请求B在请求A的这一行执行前已经完成更新了
+	// 3. 那么此时的tr.UpdateAt已经被修改掉，在mongo中找不到这条数据了
+	// 4. 因此A更新失败，要进行重试，避免了写冲突导致的数据不一致
 	s.Mongo.UpdateTrip(ctx, tid, aid, tr.UpdatedAt, tr.Trip)
 }
 

@@ -40,7 +40,7 @@ func (m *Mongo) CreateTrip(c context.Context, trip *rentalpb.Trip) (*TripRecord,
 		Trip: trip,
 	}
 	r.ID = mgutil.NewObjID()
-	r.UpdatedAt = mgutil.UpdatedAt()
+	r.UpdatedAt = mgutil.UpdatedAt() // 在创建trip时 使用默认的时间函数生成时间
 
 	_, err := m.col.InsertOne(c, r)
 	if err != nil {
@@ -102,14 +102,15 @@ func (m *Mongo) GetTrips(c context.Context, accountID id.AccountID, status renta
 }
 
 func (m *Mongo) UpdateTrip(c context.Context, tid id.TripID, aid id.AccountID, updatedAt int64, trip *rentalpb.Trip) error {
+	// 将 tripID 转为 objectID
 	objID, err := objid.FromID(tid)
 	if err != nil {
 		return fmt.Errorf("invalid id: %v", err)
 	}
 
-	newUpdatedAt := mgutil.UpdatedAt()
+	newUpdatedAt := mgutil.UpdatedAt() // 生成新的修改时间
 
-	_, err = m.col.UpdateOne(c, bson.M{
+	res, err := m.col.UpdateOne(c, bson.M{
 		mgutil.IDFieldName:        objID,
 		accountIDField:            aid.String(),
 		mgutil.UpdatedAtFieldName: updatedAt,
@@ -117,5 +118,11 @@ func (m *Mongo) UpdateTrip(c context.Context, tid id.TripID, aid id.AccountID, u
 		tripField:                 trip,
 		mgutil.UpdatedAtFieldName: newUpdatedAt,
 	}))
-	return err
+	if err != nil {
+		return err
+	}
+	if res.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	return nil
 }

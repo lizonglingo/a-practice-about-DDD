@@ -274,6 +274,7 @@ func TestMongo_UpdateTrip(t *testing.T) {
 	}
 
 	tr, err := m.CreateTrip(c, &rentalpb.Trip{
+		// createTrip.updatedat = 10000
 		AccountId: aid.String(),
 		Status:    rentalpb.TripStatus_IN_PROGRESS,
 		Start: &rentalpb.LocationStatus{
@@ -297,7 +298,7 @@ func TestMongo_UpdateTrip(t *testing.T) {
 	cases := []struct {
 		name          string
 		now           int64
-		withUpdatedAt int64
+		withUpdatedAt int64		// mongo中trip记录的上一次修改时间
 		wantErr       bool
 	}{
 		{
@@ -318,13 +319,31 @@ func TestMongo_UpdateTrip(t *testing.T) {
 		},
 	}
 
-	//for _, cc := range cases {
-	//	now := cc.now
-	//	err := m.UpdateTrip(c, tid, aid, cc.withUpdatedAt, update)
-	//	if cc.wantErr {
-	//		if err == nil {
-	//			t.Errorf("%s: want error; got none: %v", cc.name, err)
-	//		}
-	//	}
-	//}
+	for _, cc := range cases {
+		now := cc.now
+		mgo.UpdatedAt = func() int64 {
+			return now
+		}
+		err := m.UpdateTrip(c, tid, aid, cc.withUpdatedAt, update)
+		if cc.wantErr {
+			if err == nil {
+				t.Errorf("%s: want error; got none: %v", cc.name, err)
+			} else {
+				continue
+			}
+		} else {
+			if err != nil {
+				t.Errorf("%s: cannot update: %v", cc.name, err)
+			}
+		}
+		// 重新取一遍数据来验时间戳
+		updatedTrip, err := m.GetTrip(c, tid, aid)
+		if err != nil {
+			t.Errorf("%s: cannot get trip after update %v", cc.name,err)
+		}
+		if now != updatedTrip.UpdatedAt {
+			t.Errorf("%s: incorrect updatedat: want %d, got %d", cc.name,cc.now, updatedTrip.UpdatedAt)
+			// t.Errorf("--%s--", updatedTrip.Trip.Start.PoiName)
+		}
+	}
 }
