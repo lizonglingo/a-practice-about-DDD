@@ -4,6 +4,7 @@ import { routing } from "../../utils/routing"
 
 const shareLocationKey = "share_location"
 Page({
+    carID: '',
     data: {
         shareLocation: false,
         avatarURL: '',
@@ -12,6 +13,7 @@ Page({
     async onLoad(opt: Record<'car_id', string>) {
         const o: routing.LockOpts = opt
         console.log('unlocking car', o.car_id)
+        this.carID = o.car_id
         const userInfo = await getApp<IAppOption>().globalData.userInfo
         this.setData({
             avatarURL: userInfo.avatarUrl,
@@ -36,7 +38,7 @@ Page({
     onUnlockTap() {
         wx.getLocation({
             type: 'gcj02',
-            success: loc => {
+            success: async loc => {
                 console.log('starting a trip', {
                     location: {
                         latitude: loc.latitude,
@@ -46,28 +48,46 @@ Page({
                     avatarURL: this.data.shareLocation ? this.data.avatarURL : '',
                 })
 
-                TripService.CreateTrip({
-                    start: 'abccc',
+                if (!this.carID) {
+                    console.error('no carID specified')
+                    return
+                } else {
+                    console.log('lock.ts 55')
+                }
+
+                // 异步的开锁  等待创建返回
+                const trip = await TripService.CreateTrip({
+                    start: {
+                        latitude: loc.latitude,
+                        longitude: loc.longitude,
+                    },
+                    carId: this.carID,
                 })
                 // return      // 暂时return避免页面跳转带来问题
-                const tripID = 'trip123'
+                // const tripID = 'trip123'
 
-                    wx.showLoading({
-                        title: '开锁中',
-                        mask: true,
+                if (!trip.id) {
+                    console.error('no tripID in response', trip)
+                    return
+                } else {
+                    console.log(trip.id)
+                }
+                wx.showLoading({
+                    title: '开锁中',
+                    mask: true,
+                })
+
+                setTimeout(() => {
+                    wx.redirectTo({
+                        // url: `/pages/driving/driving?trip_id=${tripID}`,
+                        url: routing.driving({
+                            trip_id: trip.id!
+                        }),
+                        complete: () => {
+                            wx.hideLoading()
+                        }
                     })
-
-                    setTimeout(() => {
-                        wx.redirectTo({
-                            // url: `/pages/driving/driving?trip_id=${tripID}`,
-                            url: routing.driving({
-                                trip_id: tripID
-                            }),
-                            complete: () => {
-                                wx.hideLoading()
-                            }
-                        })
-                    }, 3000)
+                }, 3000)
 
             },
 
