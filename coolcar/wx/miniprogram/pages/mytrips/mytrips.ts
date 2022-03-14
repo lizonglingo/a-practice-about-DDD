@@ -1,4 +1,6 @@
 import { IAppOption } from "../../appoption"
+import { rental } from "../../service/proto_gen/rental/rental_pb"
+import { TripService } from "../../service/trip"
 import { routing } from "../../utils/routing"
 
 interface Trip {
@@ -77,6 +79,7 @@ Page({
         navScroll: '',
     },
     async onLoad() {
+        const res = await TripService.GetTrips(rental.v1.TripStatus.FINISHED)
         this.populateTrips()
         const userInfo = await getApp<IAppOption>().globalData.userInfo
         this.setData({

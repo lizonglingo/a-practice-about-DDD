@@ -6,3 +6,10 @@ http:
     - selector: rental.v1.TripService.CreateTrip
       post: /v1/trip
       body: "*"             # 指的是在body中会带着一个请求
+    - selector: rental.v1.TripService.GetTrip
+      get: /v1/trip/{id}
+    - selector: rental.v1.TripService.GetTrips
+      get: /v1/trips
+    - selector: rental.v1.TripService.UpdateTrip
+      put: /v1/trip/{id}
+      body: "*"             # 指的是在body中会带着一个请求

@@ -116,3 +116,6 @@ func SetupIndexes(c context.Context, d *mongo.Database) error {
 	})
 	return err
 }
+
+
+// docker run -p 18000:18000 -p 18001:18001 -p 27017:27017 -e ICODE=J19CA99F690CED0ED -v D:\Coding\WorkPlace\Golang\dockerVolumes\coolcar:/data/db ccr.ccs.tencentyun.com/coolcar/coolenv:latest

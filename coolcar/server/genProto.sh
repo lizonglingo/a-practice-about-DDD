@@ -9,7 +9,7 @@ function genProto {
     PBTS_BIN_DIR=../wx/miniprogram/node_modules/.bin
     PBTS_OUT_DIR=../wx/miniprogram/service/proto_gen/${DOMAIN}
 
-    $PBTS_BIN_DIR/pbjs -t static -w es6 $PROTO_PATH/${DOMAIN}.proto --no-create --no-encode --no-decode --no-verify --no-delimited -o $PBTS_OUT_DIR/${DOMAIN}_pb_temp.js
+    $PBTS_BIN_DIR/pbjs -t static -w es6 $PROTO_PATH/${DOMAIN}.proto --no-create --no-encode --no-decode --no-verify --no-delimited --force-number -o $PBTS_OUT_DIR/${DOMAIN}_pb_temp.js
 
     echo 'import * as $protobuf from "protobufjs";' > $PBTS_OUT_DIR/${DOMAIN}_pb.js
     cat $PBTS_OUT_DIR/${DOMAIN}_pb_temp.js >> $PBTS_OUT_DIR/${DOMAIN}_pb.js

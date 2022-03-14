@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"coolcar/rental/ai"
 	rentalpb "coolcar/rental/api/gen/v1"
 	"coolcar/rental/trip"
 	"coolcar/rental/trip/client/car"
 	"coolcar/rental/trip/client/poi"
 	"coolcar/rental/trip/client/profile"
 	"coolcar/rental/trip/dao"
+	coolenvpb "coolcar/shared/coolenv"
 	"coolcar/shared/server"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,6 +24,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("cannot create logger: %v\n", err)
 	}
+
+	// 创建 AIClient
+	ac, err := grpc.Dial("localhost:18001", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal("cannot connect to aiservice", zap.Error(err))
+	}
+
 
 	// 创建mongo client
 	c := context.Background()
@@ -41,6 +50,9 @@ func main() {
 				CarManager: &car.Manager{},
 				POIManager: &poi.Manager{},
 				Mongo: dao.NewMongo(mongoClient.Database("coolcar")),
+				DistanceCalc: &ai.Client{
+					AIClient: coolenvpb.NewAIServiceClient(ac),
+				},
 				Logger: logger,
 			})
 		},
