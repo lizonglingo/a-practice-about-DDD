@@ -25,7 +25,7 @@ func RunGRPCServer(c *GRPCConfig) error {
 	}
 
 	var gRPCOpts []grpc.ServerOption
-	if c.AuthPublicKeyFile != "" {
+	if c.AuthPublicKeyFile != "" {		// 说明此时需要添加拦截器 引入鉴权中间件
 		in, err := auth.Interceptor(c.AuthPublicKeyFile)
 		if err != nil {
 			c.Logger.Fatal("cannot create auth interceptor", nameField, zap.Error(err))

@@ -173,7 +173,7 @@ func (s *Service) UpdateTrip(ctx context.Context, request *rentalpb.UpdateTripRe
 		s.Logger.Error("update trip error", zap.Error(err))
 	}
 
-	return nil, nil
+	return tr.Trip, nil
 }
 
 var nowFunc = func() int64 {
