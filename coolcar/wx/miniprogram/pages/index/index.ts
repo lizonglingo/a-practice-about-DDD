@@ -1,4 +1,6 @@
 import { IAppOption } from "../../appoption"
+import { rental } from "../../service/proto_gen/rental/rental_pb"
+import { TripService } from "../../service/trip"
 import { routing } from "../../utils/routing"
 
 Page({
@@ -53,33 +55,68 @@ Page({
     })
   },
 
-  onScanTap() {
-    wx.scanCode({
-      success: () => {
-        wx.showModal({
-          title: '身份认证',
-          content: '认证后方可租车',
-          success: (res) => {
-            if (res.confirm) {
-              // TODO: get car id from scan result
-              const carID = 'car123'
-              // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
-              const redirectURL: string = routing.lock({
-                car_id: carID,
+  async onScanTap() {
+    // 扫码之前给予保护 避免在行程中创建新的行程
+    const trips = await TripService.getTrips(rental.v1.TripStatus.IN_PROGRESS)
+    let doScanCode = false  // 限制在弹出Modal是弹出扫码界面
+    if ((trips.trips?.length || 0) > 0) {
+      wx.showModal({
+        title: '有未结束的行程',
+        content: '将跳转至行程页面',
+        confirmText: "跳转",
+        showCancel: false,
+        success: (res) => {
+          if (res.confirm) {
+            // 如果已经有行程
+            wx.navigateTo({
+              url: routing.driving({
+                trip_id: trips.trips![0].id!,
               })
-              wx.navigateTo({
-                // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
-                url: routing.register({
-                  redirectURL: redirectURL,
-                })
-              })
-            }
-          },
+            })
+            return
+          } else if (res.cancel) {
+          }
+        }
+      })
+      // // 如果已经有行程
+      // wx.navigateTo({
+      //   url: routing.driving({
+      //     trip_id: trips.trips![0].id!,
+      //   })
+      // })
+      // return
+    } else {
+      doScanCode = true
+    }
 
-        })
-      },
-      fail: console.error,
-    })
+    if (doScanCode) {
+      wx.scanCode({
+        success: () => {
+          wx.showModal({
+            title: '身份认证',
+            content: '认证后方可租车',
+            success: (res) => {
+              if (res.confirm) {
+                // TODO: get car id from scan result
+                const carID = 'car123'
+                // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
+                const redirectURL: string = routing.lock({
+                  car_id: carID,
+                })
+                wx.navigateTo({
+                  // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
+                  url: routing.register({
+                    redirectURL: redirectURL,
+                  })
+                })
+              }
+            },
+
+          })
+        },
+        fail: console.error,
+      })
+    }
 
   },
 

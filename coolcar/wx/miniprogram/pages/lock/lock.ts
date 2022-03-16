@@ -1,4 +1,5 @@
 import { IAppOption } from "../../appoption"
+import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
 import { routing } from "../../utils/routing"
 
@@ -55,23 +56,34 @@ Page({
                     console.log('lock.ts 55')
                 }
 
-                // 异步的开锁  等待创建返回
-                const trip = await TripService.CreateTrip({
-                    start: {
-                        latitude: loc.latitude,
-                        longitude: loc.longitude,
-                    },
-                    carId: this.carID,
-                })
-                // return      // 暂时return避免页面跳转带来问题
-                // const tripID = 'trip123'
+                let trip: rental.v1.ITripEntity
+                try {   // 可能会失败 所以套在 try-catch里
+                    // 异步的开锁  等待创建返回
+                    trip = await TripService.createTrip({
+                        start: {
+                            latitude: loc.latitude,
+                            longitude: loc.longitude,
+                        },
+                        carId: this.carID,
+                    })
+                    // return      // 暂时return避免页面跳转带来问题
+                    // const tripID = 'trip123'
 
-                if (!trip.id) {
-                    console.error('no tripID in response', trip)
+                    if (!trip.id) {
+                        console.error('no tripID in response', trip)
+                        return
+                    } else {
+                        console.log(trip.id)
+                    }
+                } catch (error) {
+                    wx.showToast({
+                        title: '创建行程失败',
+                        icon: 'none',
+                    })
                     return
-                } else {
-                    console.log(trip.id)
                 }
+
+
                 wx.showLoading({
                     title: '开锁中',
                     mask: true,

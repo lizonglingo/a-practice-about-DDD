@@ -79,7 +79,7 @@ Page({
         navScroll: '',
     },
     async onLoad() {
-        const res = await TripService.GetTrips(rental.v1.TripStatus.FINISHED)
+        const res = await TripService.getTrips(rental.v1.TripStatus.FINISHED)
         this.populateTrips()
         const userInfo = await getApp<IAppOption>().globalData.userInfo
         this.setData({
