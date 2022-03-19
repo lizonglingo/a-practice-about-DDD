@@ -1,8 +1,14 @@
 import { TripService } from "../../service/trip"
+import { formatDuration, formatFee } from "../../utils/format"
 import { routing } from "../../utils/routing"
 
 // const centPerSec = 0.7
 const updateIntervalSec = 5 // 每5秒向服务器上报location
+
+function durationStr(sec: number) {
+    const dur = formatDuration(sec)
+    return `${dur.hh}:${dur.mm}:${dur.ss}`
+}
 
 Page({
     tripID: '',
@@ -54,7 +60,7 @@ Page({
         let secSinceLastUpdate = 0      // 距离上次请求服务器过去的时间
         let lastUpdateDurationSec = trip.current!.timestampSec! - trip.start!.timestampSec!   // 上次询问服务器时 服务器返回的行驶总时间
         this.setData({
-            elapsed: formatDuration(lastUpdateDurationSec),
+            elapsed: durationStr(lastUpdateDurationSec),
             fee: formatFee(trip.current!.feeCent!)
         })
 
@@ -73,7 +79,7 @@ Page({
                 })
             }
             this.setData({
-                elapsed: formatDuration(lastUpdateDurationSec + secSinceLastUpdate),
+                elapsed: durationStr(lastUpdateDurationSec + secSinceLastUpdate),
             })
         }, 1000)
     },
@@ -91,20 +97,3 @@ Page({
         })
     }
 })
-
-
-function formatDuration(sec: number) {
-    const padString = (n: number) =>
-        n < 10 ? '0' + n.toFixed(0) : n.toFixed(0)
-
-    const h = Math.floor(sec / 3600)
-    sec -= 3600 * h
-    const m = Math.floor(sec / 60)
-    sec -= 60 * m
-    const s = Math.floor(sec)
-    return `${padString(h)}:${padString(m)}:${padString(s)}`
-}
-
-function formatFee(cents: number) {
-    return (cents / 100).toFixed(2)
-}

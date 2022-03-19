@@ -1,10 +1,12 @@
 import { IAppOption } from "../../appoption"
 import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
+import { formatDuration, formatFee } from "../../utils/format"
 import { routing } from "../../utils/routing"
 
 interface Trip {
     id: string
+    shortId: string
     start: string
     end: string
     duration: string
@@ -35,10 +37,20 @@ interface MainItemQueryRequest {
     }
 }
 
+
+const tripStatusMap = new Map([
+    [rental.v1.TripStatus.IN_PROGRESS, '进行中'],
+    [rental.v1.TripStatus.FINISHED, '已完成'],
+    //[rental.v1.TripStatus.TS_NOT_SPECIFIED, '未知'],
+])
+
 Page({
     scrollStates: {
         mainItems: [] as MainItemQueryRequest[],
     },
+
+    layoutReslover: undefined as ((value: unknown)=>void) | undefined,
+
     data: {
         indicatorDots: true,
         vertical: false,
@@ -79,56 +91,93 @@ Page({
         navScroll: '',
     },
     async onLoad() {
-        const res = await TripService.getTrips(rental.v1.TripStatus.FINISHED)
-        this.populateTrips()
+        const layoutReady = new Promise ((resolve) => {
+            this.layoutReslover = resolve
+        })
+
+        const [trips] = await Promise.all([TripService.getTrips(), layoutReady])
+        this.populateTrips(trips.trips!)
         const userInfo = await getApp<IAppOption>().globalData.userInfo
         this.setData({
             avatarURL: userInfo.avatarUrl,
         })
     },
     onReady() {
+
         wx.createSelectorQuery().select('#heading')
-        .boundingClientRect(rect => {
-            const height = wx.getSystemInfoSync().windowHeight - rect.height
-            this.setData({
-                tripsHeight: height,
-                navCount: Math.round(height/50),
-            })
-        }).exec()
+            .boundingClientRect(rect => {
+                const height = wx.getSystemInfoSync().windowHeight - rect.height
+                this.setData({
+                    tripsHeight: height,
+                    navCount: Math.round(height / 50),
+                }, ()=>{
+                    if (this.layoutReslover) {
+                        this.layoutReslover(1)
+                    }
+                })
+            }).exec()
     },
-    populateTrips(){
+    populateTrips(trips: rental.v1.ITripEntity[]) {
         const mainItems: MainItem[] = []
         const navItems: NavItem[] = []
         let navSel = ''
         let prevNav = ''
-        for (let i=0; i<100; i++) {
-            if(!prevNav) {
-                prevNav = 'nav-' + i
+        for (let i = 0; i < trips.length; i++) {
+            const trip = trips[i]
+            const mainId = 'main-' + i
+            const navId = 'nav-' + i
+            const shortId = trip.id?.substring(trip.id.length - 6)
+            if (!prevNav) {
+                prevNav = navId
+            }
+            // end: '宿舍',
+            // distance: '2.4公里',
+            // duration: '0时12分钟',
+            // fee: '5.2元',
+            const tripData: Trip = {
+                id: trip.id!,
+                shortId: '****'+shortId,
+                start: trip.trip?.start?.poiName || '未知',
+                end: '',
+                distance: '',
+                duration: '',
+                fee: '',
+                status: tripStatusMap.get(trip.trip?.status!) || '未知',
+            }
+            const end = trip.trip?.end
+            if (end) {
+                tripData.end = end.poiName || '未知'
+                tripData.distance = end.kmDriven?.toFixed(1) + '公里'
+                tripData.fee = formatFee(end.feeCent||0)
+                const dur = formatDuration((end.timestampSec||0) - (trip.trip?.start?.timestampSec||0))
+                tripData.duration = `${dur.hh}时${dur.mm}fen`
             }
             mainItems.push({
-                id: 'main-' + i,
-                navId: 'nav-' + i,
+                id: mainId,
+                navId: navId,
                 navScrollId: prevNav,
-                data: {
-                id: (10001+i).toString(),
-                start: '长桥',
-                end: '宿舍',
-                distance: '2.4公里',
-                duration: '0时12分钟',
-                fee: '5.2元',
-                status: '已完成',
-                }
+                data: tripData,
             })
             navItems.push({
-                id: 'nav-' + i,
-                mainId: 'main-' + i,
-                label: (10001+i).toString(),
+                id: navId,
+                mainId: mainId,
+                label: shortId||'',
             })
-            if (i===0) {
-                navSel = 'nav-' + i
+            if (i === 0) {
+                navSel = navId
             }
-            prevNav = 'nav-' + i
+            prevNav = navId
         }
+
+        console.log('nav count:', this.data.navCount)
+        for(let i = 0; i<this.data.navCount-1; i++) {
+            navItems.push({
+                id: '',
+                mainId: '',
+                label: '',
+            })
+        }
+
         this.setData({
             mainItems: mainItems,
             navItems: navItems,
@@ -140,21 +189,21 @@ Page({
 
     prepareScrollStates() {
         wx.createSelectorQuery().selectAll('.main-item')
-        .fields({
-            id: true,
-            dataset: true,
-            rect: true
-        }).exec( res => {
-            this.scrollStates.mainItems = res[0]
-        })
+            .fields({
+                id: true,
+                dataset: true,
+                rect: true
+            }).exec(res => {
+                this.scrollStates.mainItems = res[0]
+            })
     },
 
     onSwiperChange(e: any) {
-        console.log(e)
+        //console.log(e)
     },
 
     onPromotionItemTap(e: any) {
-        console.log(e)
+        //console.log(e)
     },
 
     onRegisterTap() {
@@ -188,7 +237,7 @@ Page({
         if (top === undefined) {
             return
         }
-        const selItem =  this.scrollStates.mainItems.find( v => v.top >= top)
+        const selItem = this.scrollStates.mainItems.find(v => v.top >= top)
         if (!selItem) {
             return
         }
