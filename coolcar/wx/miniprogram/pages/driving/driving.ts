@@ -1,3 +1,4 @@
+import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
 import { formatDuration, formatFee } from "../../utils/format"
 import { routing } from "../../utils/routing"
@@ -57,6 +58,10 @@ Page({
     async setupTimer(id: string) {
         // 在进入时先看数据库
         const trip = await TripService.updateTripPos(id)
+        if (trip.status !== rental.v1.TripStatus.IN_PROGRESS) {
+            console.error('trip not in progress')
+            return
+        }
         let secSinceLastUpdate = 0      // 距离上次请求服务器过去的时间
         let lastUpdateDurationSec = trip.current!.timestampSec! - trip.start!.timestampSec!   // 上次询问服务器时 服务器返回的行驶总时间
         this.setData({

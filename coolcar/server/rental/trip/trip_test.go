@@ -54,21 +54,22 @@ func TestMain(m *testing.M) {
 	os.Exit(mongotesting.RunWithMongoInDocker(m))
 }
 
-func TestService_TripLifeCycle(t *testing.T)  {
+func TestService_TripLifeCycle(t *testing.T) {
 	c := auth.ContextWithAccountID(context.Background(), id.AccountID("account_for_lifecycle"))
 	s := newTestService(c, t, &profileManager{}, &carManager{})
 
 	tid := id.TripID("6229f1a3326ea347800db42e")
 	mgo.NewObjectIDWithValue(tid)
-	cases := []struct{
-		name string
-		now int64
-		op func() (*rentalpb.Trip, error)
-		want string
-	} {
+	cases := []struct {
+		name    string
+		now     int64
+		op      func() (*rentalpb.Trip, error)
+		want    string
+		wantErr bool
+	}{
 		{
 			name: "create_trip",
-			now: 10000,
+			now:  10000,
 			op: func() (*rentalpb.Trip, error) {
 				e, err := s.CreateTrip(c, &rentalpb.CreateTripRequest{
 					Start: &rentalpb.Location{
@@ -86,10 +87,10 @@ func TestService_TripLifeCycle(t *testing.T)  {
 		},
 		{
 			name: "update_trip",
-			now: 20000,
+			now:  20000,
 			op: func() (*rentalpb.Trip, error) {
-				 return s.UpdateTrip(c, &rentalpb.UpdateTripRequest{
-					Id:      tid.String(),
+				return s.UpdateTrip(c, &rentalpb.UpdateTripRequest{
+					Id: tid.String(),
 					Current: &rentalpb.Location{
 						Latitude:  23.421,
 						Longitude: 123.32,
@@ -100,10 +101,10 @@ func TestService_TripLifeCycle(t *testing.T)  {
 		},
 		{
 			name: "finish_trip",
-			now: 30000,
+			now:  30000,
 			op: func() (*rentalpb.Trip, error) {
 				return s.UpdateTrip(c, &rentalpb.UpdateTripRequest{
-					Id:     tid.String(),
+					Id:      tid.String(),
 					EndTrip: true,
 				})
 			},
@@ -111,11 +112,19 @@ func TestService_TripLifeCycle(t *testing.T)  {
 		},
 		{
 			name: "query_trip",
-			now: 40000,
+			now:  40000,
 			op: func() (*rentalpb.Trip, error) {
 				return s.GetTrip(c, &rentalpb.GetTripRequest{Id: tid.String()})
 			},
 			want: `{"account_id":"account_for_lifecycle","car_id":"car1","start":{"location":{"latitude":32,"longitude":113},"poi_name":"地点8","timestamp_sec":10000},"current":{"location":{"latitude":23.421,"longitude":123.32},"fee_cent":18643,"km_driven":100,"poi_name":"地点3","timestamp_sec":30000},"end":{"location":{"latitude":23.421,"longitude":123.32},"fee_cent":18643,"km_driven":100,"poi_name":"地点3","timestamp_sec":30000},"status":2}`,
+		},
+		{
+			name: "update_after_finished",
+			now:  50000,
+			op: func() (*rentalpb.Trip, error) {
+				return s.UpdateTrip(c, &rentalpb.UpdateTripRequest{Id: tid.String()})
+			},
+			wantErr: true,
 		},
 	}
 	rand.Seed(1234)
@@ -124,6 +133,13 @@ func TestService_TripLifeCycle(t *testing.T)  {
 			return cc.now
 		}
 		trip, err := cc.op()
+		if cc.wantErr {
+			if err == nil {
+				t.Errorf("%s: want error; got none", cc.name)
+			} else {
+				continue
+			}
+		}
 		if err != nil {
 			t.Errorf("%s: operating failed; %v", cc.name, err)
 			continue

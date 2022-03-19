@@ -3,6 +3,7 @@ import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
 import { formatDuration, formatFee } from "../../utils/format"
 import { routing } from "../../utils/routing"
+import { getUserInfo } from "../../utils/wxapi"
 
 interface Trip {
     id: string
@@ -49,7 +50,7 @@ Page({
         mainItems: [] as MainItemQueryRequest[],
     },
 
-    layoutReslover: undefined as ((value: unknown)=>void) | undefined,
+    layoutReslover: undefined as ((value: unknown) => void) | undefined,
 
     data: {
         indicatorDots: true,
@@ -90,17 +91,21 @@ Page({
         navSel: '',
         navScroll: '',
     },
-    async onLoad() {
-        const layoutReady = new Promise ((resolve) => {
+    onLoad() {
+        const layoutReady = new Promise((resolve) => {
             this.layoutReslover = resolve
         })
 
-        const [trips] = await Promise.all([TripService.getTrips(), layoutReady])
-        this.populateTrips(trips.trips!)
-        const userInfo = await getApp<IAppOption>().globalData.userInfo
-        this.setData({
-            avatarURL: userInfo.avatarUrl,
+        Promise.all([TripService.getTrips(), layoutReady]).then(([trips]) => {
+            this.populateTrips(trips.trips!)
         })
+
+        getApp<IAppOption>().globalData.userInfo.then(userInfo => {
+            this.setData({
+                avatarURL: userInfo.avatarUrl,
+            })
+        })
+
     },
     onReady() {
 
@@ -110,7 +115,7 @@ Page({
                 this.setData({
                     tripsHeight: height,
                     navCount: Math.round(height / 50),
-                }, ()=>{
+                }, () => {
                     if (this.layoutReslover) {
                         this.layoutReslover(1)
                     }
@@ -136,7 +141,7 @@ Page({
             // fee: '5.2元',
             const tripData: Trip = {
                 id: trip.id!,
-                shortId: '****'+shortId,
+                shortId: '****' + shortId,
                 start: trip.trip?.start?.poiName || '未知',
                 end: '',
                 distance: '',
@@ -148,10 +153,11 @@ Page({
             if (end) {
                 tripData.end = end.poiName || '未知'
                 tripData.distance = end.kmDriven?.toFixed(1) + '公里'
-                tripData.fee = formatFee(end.feeCent||0)
-                const dur = formatDuration((end.timestampSec||0) - (trip.trip?.start?.timestampSec||0))
-                tripData.duration = `${dur.hh}时${dur.mm}fen`
+                tripData.fee = formatFee(end.feeCent || 0)
+                const dur = formatDuration((end.timestampSec || 0) - (trip.trip?.start?.timestampSec || 0))
+                tripData.duration = `${dur.hh}时${dur.mm}分`
             }
+            // console.log(trips)
             mainItems.push({
                 id: mainId,
                 navId: navId,
@@ -161,7 +167,7 @@ Page({
             navItems.push({
                 id: navId,
                 mainId: mainId,
-                label: shortId||'',
+                label: shortId || '',
             })
             if (i === 0) {
                 navSel = navId
@@ -170,7 +176,7 @@ Page({
         }
 
         console.log('nav count:', this.data.navCount)
-        for(let i = 0; i<this.data.navCount-1; i++) {
+        for (let i = 0; i < this.data.navCount - 1; i++) {
             navItems.push({
                 id: '',
                 mainId: '',
