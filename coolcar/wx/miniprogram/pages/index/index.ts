@@ -1,4 +1,5 @@
 import { IAppOption } from "../../appoption"
+import { ProfileService } from "../../service/profile"
 import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
 import { routing } from "../../utils/routing"
@@ -91,28 +92,37 @@ Page({
 
     if (doScanCode) {
       wx.scanCode({
-        success: () => {
-          wx.showModal({
-            title: '身份认证',
-            content: '认证后方可租车',
-            success: (res) => {
-              if (res.confirm) {
-                // TODO: get car id from scan result
-                const carID = 'car123'
-                // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
-                const redirectURL: string = routing.lock({
-                  car_id: carID,
-                })
-                wx.navigateTo({
-                  // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
-                  url: routing.register({
-                    redirectURL: redirectURL,
-                  })
-                })
-              }
-            },
-
+        success: async () => {
+          // 首先查看是否已经通过身份认真 然后决定是否弹出模态框
+          const prof = await ProfileService.getProfile()
+          const carID = 'car123'
+          // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
+          const lockURL: string = routing.lock({
+            car_id: carID,
           })
+          if (prof.identityStatus === rental.v1.IdentityStatus.VERIFIED) {
+            wx.navigateTo({
+              url: lockURL,
+            })
+          } else {
+            wx.showModal({
+              title: '身份认证',
+              content: '认证后方可租车',
+              success: (res) => {
+                if (res.confirm) {
+                  // TODO: get car id from scan result
+
+                  wx.navigateTo({
+                    // url: `/pages/register/register?redirect=${encodeURIComponent(redirectURL)}`,
+                    url: routing.register({
+                      redirectURL: lockURL,
+                    })
+                  })
+                }
+              },
+
+            })
+          }
         },
         fail: console.error,
       })

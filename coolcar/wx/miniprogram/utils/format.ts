@@ -1,4 +1,6 @@
-
+export function padString(n: number) {
+    return n < 10 ? '0' + n.toFixed(0) : n.toFixed(0)
+}
 export function formatDuration(sec: number) {
     const padString = (n: number) =>
         n < 10 ? '0' + n.toFixed(0) : n.toFixed(0)

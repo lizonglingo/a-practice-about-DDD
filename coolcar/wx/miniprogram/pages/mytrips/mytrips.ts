@@ -1,4 +1,5 @@
 import { IAppOption } from "../../appoption"
+import { ProfileService } from "../../service/profile"
 import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
 import { formatDuration, formatFee } from "../../utils/format"
@@ -45,6 +46,13 @@ const tripStatusMap = new Map([
     //[rental.v1.TripStatus.TS_NOT_SPECIFIED, '未知'],
 ])
 
+
+const licStatusMap = new Map([
+    [rental.v1.IdentityStatus.UNSUBMITTED, '未认证'],
+    [rental.v1.IdentityStatus.PENDING, '未认证'],
+    [rental.v1.IdentityStatus.VERIFIED, '已认证'],
+])
+
 Page({
     scrollStates: {
         mainItems: [] as MainItemQueryRequest[],
@@ -82,6 +90,7 @@ Page({
                 promotionID: '5',
             },
         ],
+        licStatus: licStatusMap.get(rental.v1.IdentityStatus.UNSUBMITTED),
         avatarURL: '',
         tripsHeight: 0,
         mainItems: [] as MainItem[],
@@ -106,7 +115,18 @@ Page({
             })
         })
 
+        
     },
+
+    onShow() {
+        ProfileService.getProfile().then(p=>{
+            this.setData({
+                licStatus: licStatusMap.get(p.identityStatus || 0),
+            })
+        })
+
+    },
+
     onReady() {
 
         wx.createSelectorQuery().select('#heading')
