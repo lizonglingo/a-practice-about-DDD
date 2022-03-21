@@ -3,3 +3,5 @@ coolcar/server/auth/private.key
 coolcar/server/auth/main.go
 coolcar/server/cmd/oos/123.jpeg
 coolcar/server/cmd/oos/main.go
+coolcar/server/blob/main.go
+coolcar/server/blob/main.go

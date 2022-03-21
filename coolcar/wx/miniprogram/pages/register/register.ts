@@ -59,8 +59,9 @@ Page({
                     const data = wx.getFileSystemManager().readFileSync(res.tempFilePaths[0])
                     wx.request({
                         method: 'PUT',
-                        url: 'https://coolcar-1258527714.cos.ap-chengdu.myqcloud.com/abc.jpg?q-sign-algorithm=sha1&q-ak=AKIDkJdhX7SXNyJPJyNWQ5UdXBajdHgpjQt7&q-sign-time=1647768257%3B1647774257&q-key-time=1647768257%3B1647774257&q-header-list=host&q-url-param-list=&q-signature=62b7ae77809e69a15d6c0867637e4cce334315b5',
+                        url: 'https://coolcar-1258527714.cos.ap-chengdu.myqcloud.com/account_7/6238aff191d403467ac7896b?q-sign-algorithm=sha1&q-ak=AKIDkJdhX7SXNyJPJyNWQ5UdXBajdHgpjQt7&q-sign-time=1647882225%3B1647883225&q-key-time=1647882225%3B1647883225&q-header-list=content-type%3Bhost&q-url-param-list=&q-signature=e61cdf9a01088cffadc5f1246701c24967c80656',
                         data: data,
+                        header: {'content-type': 'image/jpeg'},
                         success: console.log,
                         fail: console.error,
                     })
