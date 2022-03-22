@@ -58,10 +58,10 @@ Page({
                     // TODO: upload lic
                     const data = wx.getFileSystemManager().readFileSync(res.tempFilePaths[0])
                     wx.request({
-                        method: 'PUT',
-                        url: 'https://coolcar-1258527714.cos.ap-chengdu.myqcloud.com/account_7/6238aff191d403467ac7896b?q-sign-algorithm=sha1&q-ak=AKIDkJdhX7SXNyJPJyNWQ5UdXBajdHgpjQt7&q-sign-time=1647882225%3B1647883225&q-key-time=1647882225%3B1647883225&q-header-list=content-type%3Bhost&q-url-param-list=&q-signature=e61cdf9a01088cffadc5f1246701c24967c80656',
+                        method: 'GET',
+                        url: 'https://coolcar-1258527714.cos.ap-chengdu.myqcloud.com/account_8/623962c2ab5141315d22813e?q-sign-algorithm=sha1&q-ak=AKIDkJdhX7SXNyJPJyNWQ5UdXBajdHgpjQt7&q-sign-time=1647928686%3B1647929286&q-key-time=1647928686%3B1647929286&q-header-list=host&q-url-param-list=&q-signature=646370db95bf9ba5fc3046ba52e9df8a393e6777',
                         data: data,
-                        header: {'content-type': 'image/jpeg'},
+                        header: {'Content-Type': 'image/jpeg'},
                         success: console.log,
                         fail: console.error,
                     })
