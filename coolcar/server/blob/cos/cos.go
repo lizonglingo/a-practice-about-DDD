@@ -74,9 +74,6 @@ func NewService(addr, secID, secKey string) (*Service, error) {
 	}
 	b := &cos.BaseURL{BucketURL: u, ServiceURL: su}
 
-	//secID := "AKIDkJdhX7SXNyJPJyNWQ5UdXBajdHgpjQt7"
-	//secKey := "nMglaAVaPzJODn7C2cx3tTotjJdiY8SW"
-
 	return &Service{
 		client: cos.NewClient(b, &http.Client{
 			Transport: &cos.AuthorizationTransport{
