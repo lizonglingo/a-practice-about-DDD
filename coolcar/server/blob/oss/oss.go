@@ -1,5 +1,5 @@
 // 使用 aliyun 接口重新实现对象存储服务
-package aliyun_oos
+package aliyun_oss
 
 import (
 	"bytes"
@@ -29,16 +29,19 @@ func (s *Service) SignURL(c context.Context, method, path string, timeout time.D
 		return "", err
 	}
 	signedURL := ""
+	options := []oss.Option{
+		oss.ContentType("image/jpeg"),
+	}
 	if method == "GET" {
 		// 这里尝试将 time.Duration 转 int64 的 秒 表示
-		signedURL, err = bucket.SignURL(path, http.MethodGet, int64(timeout.Seconds()), nil)
+		signedURL, err = bucket.SignURL(path, http.MethodGet, int64(timeout.Seconds()), options...)
 		if err != nil {
 			return "", err
 		}
 	}
 
 	if method == "PUT" {
-		signedURL, err = bucket.SignURL(path, http.MethodPut, int64(timeout.Seconds()), nil)
+		signedURL, err = bucket.SignURL(path, http.MethodPut, int64(timeout.Seconds()), options...)
 		if err != nil {
 			return "", err
 		}

@@ -49,6 +49,32 @@ Page({
     },
 
     onUploadLic() {
+        // 用于测试获取图片URL
+        //let lic_url_test: string = ''
+         // 测试获取
+         wx.downloadFile({
+            url: 'http://coolcar-lzl.oss-cn-beijing.aliyuncs.com/account_9623aef4bf56efac37b44f217?Expires=1648032204&OSSAccessKeyId=LTAI5tLK8Ckc7uPgkxTFh5aB&Signature=TjP%2FZMqn4MQFi8dIKs4%2BR%2BVJ5fI%3D',
+            header: { 'Content-Type': 'image/jpeg' },
+            success(res) {
+                // 只要服务器有响应数据，就会把响应内容写入文件并进入 success 回调，业务需要自行判断是否下载到了想要的内容
+                if (res.statusCode === 200) {
+                    console.log(123)
+                    console.log(res.tempFilePath)
+                    console.log(123)
+                    // 直接 set 到图片路径
+                    wx.setStorageSync('licPicUrl', res.tempFilePath)
+                   
+                }
+                
+            }
+        })
+        
+        console.log("storage", wx.getStorageSync('licPicUrl'))
+        this.setData({
+            licImgURL: wx.getStorageSync('licPicUrl'),
+        })
+
+       
         wx.chooseImage({
             success: res => {
                 if (res.tempFilePaths.length > 0) {
@@ -57,14 +83,20 @@ Page({
                     })
                     // TODO: upload lic
                     const data = wx.getFileSystemManager().readFileSync(res.tempFilePaths[0])
-                    wx.request({
-                        method: 'GET',
-                        url: 'https://coolcar-1258527714.cos.ap-chengdu.myqcloud.com/account_8/623962c2ab5141315d22813e?q-sign-algorithm=sha1&q-ak=AKIDkJdhX7SXNyJPJyNWQ5UdXBajdHgpjQt7&q-sign-time=1647928686%3B1647929286&q-key-time=1647928686%3B1647929286&q-header-list=host&q-url-param-list=&q-signature=646370db95bf9ba5fc3046ba52e9df8a393e6777',
-                        data: data,
-                        header: {'Content-Type': 'image/jpeg'},
-                        success: console.log,
-                        fail: console.error,
-                    })
+
+                    // 测试上传
+                    // wx.request({
+                    //     method: 'PUT',
+                    //     url: 'http://coolcar-lzl.oss-cn-beijing.aliyuncs.com/account_9623aef4bf56efac37b44f217?Expires=1648030515&OSSAccessKeyId=LTAI5tLK8Ckc7uPgkxTFh5aB&Signature=%2FB9XfwiToAeqO0wpTnBOormBp7Q%3D',
+                    //     data: data,
+                    //     header: {'Content-Type': 'image/jpeg'},
+                    //     success: console.log,
+                    //     fail: console.error,
+                    // })
+
+                   
+
+
                     // 假设等一秒才拿到解析完
                     // setTimeout(() => {
                     //     this.setData({

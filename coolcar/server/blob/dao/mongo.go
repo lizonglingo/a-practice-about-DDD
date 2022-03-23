@@ -35,7 +35,7 @@ func (m *Mongo) CreateBlob(c context.Context, aid id.AccountID) (*BlobRecord, er
 	br.ID = objID
 
 	// TODO: 如何限制文件格式
-	br.Path = fmt.Sprintf("%s/%s", aid.String(), objID.Hex())
+	br.Path = fmt.Sprintf("%s%s", aid.String(), objID.Hex())
 	// log.Print("use jpg!")
 
 	_, err := m.col.InsertOne(c, br)
