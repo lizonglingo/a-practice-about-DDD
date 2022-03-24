@@ -47,3 +47,19 @@ func NewObjectIDWithValue(id fmt.Stringer) {
 var UpdatedAt = func() int64 {
 	return time.Now().UnixNano()
 }
+
+// ZeroOrDoseNotExist 生成一个更新条件.
+func ZeroOrDoseNotExist(field string, zero interface{}) bson.M  {
+	return bson.M{
+		"$or": []bson.M{
+			{
+				field: zero,
+			},
+			{
+				field: bson.M{
+					"$exists": false,
+				},
+			},
+		},
+	}
+}
