@@ -16,6 +16,7 @@ require (
 	github.com/medivhzhan/weapp/v2 v2.4.2
 	github.com/mozillazg/go-httpheader v0.3.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
+	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.34 // indirect
 	go.mongodb.org/mongo-driver v1.8.4
 	go.uber.org/zap v1.21.0
