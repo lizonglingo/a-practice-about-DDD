@@ -51,7 +51,7 @@ func (m *Mongo) CreateCar(ctx context.Context) (*CarRecord, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nil, err
+	return r, err
 }
 
 func (m *Mongo) GetCar(ctx context.Context, id id.CarID) (*CarRecord, error) {
@@ -63,17 +63,7 @@ func (m *Mongo) GetCar(ctx context.Context, id id.CarID) (*CarRecord, error) {
 	res := m.col.FindOne(ctx, bson.M{
 		mgo.IDFieldName: objID,
 	})
-	if err := res.Err(); err != nil {
-		return nil, err
-	}
-
-	var cr CarRecord
-	err = res.Decode(&cr)
-	if err != nil {
-		return nil, fmt.Errorf("cannot decode: %v", err)
-	}
-
-	return &cr, nil
+	return covertSingResult(res)
 }
 
 func (m *Mongo) GetCars(ctx context.Context) ([]*CarRecord, error) {
@@ -105,10 +95,10 @@ type CarUpdate struct {
 }
 
 // UpdateCar 这里的status用来做更新car的前置条件.
-func (m *Mongo) UpdateCar(ctx context.Context, id id.CarID, status carpb.CarStatus, update *CarUpdate) error {
+func (m *Mongo) UpdateCar(ctx context.Context, id id.CarID, status carpb.CarStatus, update *CarUpdate) (*CarRecord, error) {
 	objID, err := objid.FromID(id)
 	if err != nil {
-		return fmt.Errorf("invaild car id: %v", err)
+		return nil, fmt.Errorf("invaild car id: %v", err)
 	}
 
 	// 判断以下是 只用 id 来定位哪条记录 还是使用 id+status 来找
@@ -132,12 +122,20 @@ func (m *Mongo) UpdateCar(ctx context.Context, id id.CarID, status carpb.CarStat
 		u[positionField] = update.Position
 	}
 
-	res, err := m.col.UpdateOne(ctx, filter, mgo.Set(u))
+	res := m.col.FindOneAndUpdate(ctx, filter, mgo.Set(u), options.FindOneAndUpdate().SetReturnDocument(options.After))
+	return covertSingResult(res)
+}
+
+func covertSingResult(res *mongo.SingleResult) (*CarRecord, error) {
+	if err := res.Err(); err != nil {
+		return nil, err
+	}
+
+	var cr CarRecord
+	err := res.Decode(&cr)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("cannot decode: %v", err)
 	}
-	if res.MatchedCount == 0 {
-		return mongo.ErrNoDocuments
-	}
-	return nil
+
+	return &cr, nil
 }

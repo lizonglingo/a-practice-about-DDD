@@ -6,6 +6,7 @@ import (
 	"coolcar/rental/trip/dao"
 	"coolcar/shared/auth"
 	"coolcar/shared/id"
+	"coolcar/shared/mongo/objid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,8 +30,9 @@ type ProfileManager interface {
 }
 
 type CarManager interface {
-	Verify(context.Context, id.CarID, *rentalpb.Location) error
-	Unlock(context.Context, id.CarID) error
+	Verify(ctx context.Context, cid id.CarID, loc *rentalpb.Location) error
+	Unlock(ctx context.Context, cid id.CarID, aid id.AccountID, tid id.TripID, avatarURL string) error
+	Lock(ctx context.Context, cid id.CarID) error
 }
 
 type POIManager interface {
@@ -52,6 +54,7 @@ func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRe
 		return nil, status.Error(codes.InvalidArgument, "")
 	}
 
+	// 验证驾驶者身份
 	iID, err := s.ProfileManager.Verify(ctx, aid)
 	if err != nil {
 		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
@@ -69,6 +72,7 @@ func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRe
 		TimestampSec: nowFunc(),
 	}, request.Start)
 
+	// 创建行程 写入数据库
 	trip, err := s.Mongo.CreateTrip(ctx, &rentalpb.Trip{
 		AccountId:  aid.String(),
 		CarId:      carID.String(),
@@ -85,7 +89,7 @@ func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRe
 	// 开锁		后做 如果先开锁，开锁成功但创建行程失败了呢？
 	// 不需要等到开完锁再告诉用户开锁成功
 	go func() {
-		err = s.CarManager.Unlock(context.Background(), carID)
+		err = s.CarManager.Unlock(context.Background(), carID, aid, objid.ToTripID(trip.ID),request.AvatarUrl)
 		if err != nil {
 			s.Logger.Error("cannot unlock car", zap.Error(err))
 		}
@@ -168,6 +172,10 @@ func (s *Service) UpdateTrip(ctx context.Context, request *rentalpb.UpdateTripRe
 	if request.EndTrip { // 说明行程已经结束
 		tr.Trip.End = tr.Trip.Current
 		tr.Trip.Status = rentalpb.TripStatus_FINISHED
+		err := s.CarManager.Lock(ctx, id.CarID(tr.Trip.CarId))
+		if err != nil {
+			return nil, status.Errorf(codes.FailedPrecondition, "cannot lock car: %v", err)
+		}
 	}
 	// 2. 请求A发生了一些问题，导致请求B在请求A的这一行执行前已经完成更新了
 	// 3. 那么此时的tr.UpdateAt已经被修改掉，在mongo中找不到这条数据了
@@ -176,6 +184,8 @@ func (s *Service) UpdateTrip(ctx context.Context, request *rentalpb.UpdateTripRe
 	if err != nil {
 		s.Logger.Error("update trip error", zap.Error(err))
 	}
+
+
 
 	return tr.Trip, nil
 }

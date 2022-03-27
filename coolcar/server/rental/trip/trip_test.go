@@ -30,14 +30,19 @@ func (p *profileManager) Verify(ctx context.Context, id id.AccountID) (id.Identi
 type carManager struct {
 	verifyErr error
 	unlockErr error
+	lockErr		error
 }
 
-func (c *carManager) Verify(ctx context.Context, carID id.CarID, location *rentalpb.Location) error {
-	return c.verifyErr
+func (m *carManager) Verify(ctx context.Context, carID id.CarID, location *rentalpb.Location) error {
+	return m.verifyErr
 }
 
-func (c *carManager) Unlock(ctx context.Context, carID id.CarID) error {
-	return c.unlockErr
+func (m *carManager) Unlock(ctx context.Context, cid id.CarID, aid id.AccountID, tid id.TripID, avatarURL string) error {
+	return m.unlockErr
+}
+
+func (m *carManager) Lock(ctx context.Context, cid id.CarID) error {
+	return m.unlockErr
 }
 
 type distCalc struct {
@@ -56,7 +61,9 @@ func TestMain(m *testing.M) {
 
 func TestService_TripLifeCycle(t *testing.T) {
 	c := auth.ContextWithAccountID(context.Background(), id.AccountID("account_for_lifecycle"))
-	s := newTestService(c, t, &profileManager{}, &carManager{})
+	s := newTestService(c, t, &profileManager{}, &carManager{
+
+	})
 
 	tid := id.TripID("6229f1a3326ea347800db42e")
 	mgo.NewObjectIDWithValue(tid)
