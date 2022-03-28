@@ -10,6 +10,7 @@ type Service struct {
 	AppSecret string
 }
 
+// Resolve 通过微信的接口获取openID.
 func (s *Service) Resolve(code string) (string, error) {
 	response, err := weapp.Login(s.AppID, s.AppSecret, code)
 	if err != nil {

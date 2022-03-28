@@ -23,6 +23,7 @@ const (
 
 // Interceptor create a new grpc auth interceptor.
 func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
+	// 1. 读取公钥 公钥用来验签
 	f, err := os.Open(publicKeyFile)
 	if err != nil{
 		return nil, fmt.Errorf("cannot open public key file: %v\n", publicKeyFile)
@@ -32,11 +33,13 @@ func Interceptor(publicKeyFile string) (grpc.UnaryServerInterceptor, error) {
 		return nil, fmt.Errorf("cannot read public key file: %v\n", publicKeyFile)
 	}
 
+	// 2. 用 jwt 转为 *rsa.PublicKey
 	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(b)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse publicKey: %v\n", err)
 	}
 
+	// 3. 初始化拦截器
 	i := &interceptor{
 		verifier: &token.JWTTokenVerifier{
 			PublicKey: pubKey,
@@ -54,22 +57,26 @@ type interceptor struct {
 	verifier tokenVerify
 }
 
-// HandleRequest 作为请求拦截处理器，返回的handler是接下来需要做的处理函数.
+// HandleRequest 作为请求拦截处理器，返回的handler是接下来需要做的处理函数
+// 根据grpc.UnaryServerInterceptor设计函数签名.
 func (i *interceptor) HandleRequest(ctx context.Context,
 									req interface{},
 									info *grpc.UnaryServerInfo,
 									handler grpc.UnaryHandler) (resp interface{}, err error)  {
-	// 从最初的context中拿到token
+	// 1. 在这之前已将token加入context
+	//    从最初的context中拿到token
 	tkn, err := tokenFromContext(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "")	// 如果没拿到token 后续的解析token的服务不会被执行
 	}
 
+	// 2. 验证token 拿到 accountID
 	accountID, err := i.verifier.Verify(tkn)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)	// 如果没拿到token 后续的解析token的服务不会被执行
 	}
 
+	// 3. 将 accountID 放入 context 中，交给后续的请求执行
 	// 拦截器捕获context 取出token
 	// 验证token 获取accountID
 	// 将 accountID 放进context

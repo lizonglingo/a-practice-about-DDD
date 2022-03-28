@@ -28,24 +28,28 @@ type TokenGenerator interface {
 }
 
 func (s *Service) Login(ctx context.Context, request *authpb.LoginRequest) (*authpb.LoginResponse, error) {
+	// 1. 拿请求中的 code 转换为 openID
 	s.Logger.Info("received code", zap.String("code", request.Code))
 	openID, err := s.OpenIDResolver.Resolve(request.Code)
 	if err != nil {
 		return nil, status.Errorf(codes.Unavailable, "cannot resolve openID: %v\n", err)
 	}
 
+	// 2. 用 openID 获取 accountID
 	accountID, err := s.Mongo.ResolveAccountID(ctx, openID) // openID 对应 mongo 中的 object.id 就是 accountID
 	if err != nil {
 		s.Logger.Error("cannot resolve account id", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "")
 	}
 
+	// 3. 用 accountID 生成 token
 	tkn, err := s.TokenGenerator.GenerateToken(accountID.String(), s.TokenExpire)
 	if err != nil {
 		s.Logger.Error("cannot generate token", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "")
 	}
 
+	// 4. 返回token和其过期时间
 	return &authpb.LoginResponse{
 		AccessToken: tkn,
 		ExpiresIn:   int32(s.TokenExpire.Seconds()),

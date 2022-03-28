@@ -7,10 +7,11 @@ import (
 	"net"
 )
 
+// GRPCConfig 公用模块配置并启动gRPC服务.
 type GRPCConfig struct {
 	Name              string
 	Addr              string
-	AuthPublicKeyFile string
+	AuthPublicKeyFile string	// 根据是否有公钥文件判断是否需要拦截器进行权限验证
 	RegisterFunc      func(*grpc.Server)
 	Logger            *zap.Logger
 }
@@ -30,6 +31,7 @@ func RunGRPCServer(c *GRPCConfig) error {
 		if err != nil {
 			c.Logger.Fatal("cannot create auth interceptor", nameField, zap.Error(err))
 		}
+		// 如果有 添加 拦截器
 		gRPCOpts = append(gRPCOpts, grpc.UnaryInterceptor(in))
 	}
 
