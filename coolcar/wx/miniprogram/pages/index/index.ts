@@ -6,6 +6,7 @@ import { routing } from "../../utils/routing"
 
 Page({
   isPageShowing: false,
+  socket: undefined as WechatMiniprogram.SocketTask | undefined,
   data: {
     avatarURL: '',
     setting: {
@@ -50,6 +51,26 @@ Page({
   },
 
   async onLoad() {
+
+    // test websocket
+    this.socket = wx.connectSocket({
+      url: 'ws://localhost:9090/ws'
+    })
+
+    let msgReceived = 0
+    this.socket.onMessage(msg => {
+      msgReceived++
+      console.log(msg)
+    })
+    
+    setInterval(() => {
+      this.socket?.send({
+        data: JSON.stringify({
+          msg_received: msgReceived,
+        })
+      })
+    }, 3000)
+
     const userInfo = await getApp<IAppOption>().globalData.userInfo
     this.setData({
       avatarURL: userInfo.avatarUrl,
