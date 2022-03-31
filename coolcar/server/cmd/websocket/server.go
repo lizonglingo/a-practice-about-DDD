@@ -25,13 +25,20 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("cannot upgrade: %v\n", err)
 		return
 	}
+	defer conn.Close()
 
+	done := make(chan struct{})	// 用来通知在连接挂掉后不再发消息
 	go func() {
 		for {
 			m := make(map[string]interface{})
 			err := conn.ReadJSON(&m)
 			if err != nil {
-				fmt.Printf("cannot read json: %v\n", err)
+				if !websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
+					fmt.Printf("unexpected read error: %v\n", err)
+				}
+
+				done <- struct{}{}
+				break
 			}
 			fmt.Printf("msg received: %v\n", m)
 		}
@@ -39,6 +46,11 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	i := 0
 	for {
+		select {
+		case <- time.After(200 * time.Millisecond):
+		case <- done:
+			return
+		}
 		i++
 		err := conn.WriteJSON(map[string]string{
 			"hello":  "websocket",
@@ -47,7 +59,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Printf("cannot write json: %v\n", err)
 		}
-		time.Sleep(200 * time.Millisecond)
+
 	}
 
 }

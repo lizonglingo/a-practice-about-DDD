@@ -1,4 +1,5 @@
 import { IAppOption } from "../../appoption"
+import { CarService } from "../../service/car"
 import { ProfileService } from "../../service/profile"
 import { rental } from "../../service/proto_gen/rental/rental_pb"
 import { TripService } from "../../service/trip"
@@ -51,25 +52,13 @@ Page({
   },
 
   async onLoad() {
-
-    // test websocket
-    this.socket = wx.connectSocket({
-      url: 'ws://localhost:9090/ws'
-    })
-
     let msgReceived = 0
-    this.socket.onMessage(msg => {
+    // test websocket
+    this.socket = CarService.subscribe(msg => {
       msgReceived++
       console.log(msg)
     })
-    
-    setInterval(() => {
-      this.socket?.send({
-        data: JSON.stringify({
-          msg_received: msgReceived,
-        })
-      })
-    }, 3000)
+
 
     const userInfo = await getApp<IAppOption>().globalData.userInfo
     this.setData({
@@ -166,6 +155,7 @@ Page({
   },
 
   onMyLocationTap() {
+    this.socket?.close({})
     wx.getLocation({
       type: 'gcj02',
       success: res => {

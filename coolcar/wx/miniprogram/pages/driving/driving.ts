@@ -57,7 +57,7 @@ Page({
     },
     async setupTimer(id: string) {
         // 在进入时先看数据库
-        const trip = await TripService.updateTripPos(id)
+        const trip = await TripService.getTrip(id)
         if (trip.status !== rental.v1.TripStatus.IN_PROGRESS) {
             console.error('trip not in progress')
             return
@@ -72,10 +72,7 @@ Page({
         this.timer = setInterval(() => {
             secSinceLastUpdate++
             if (secSinceLastUpdate % 5 == 0) {
-                TripService.updateTripPos(id, {
-                    latitude: this.data.location.latitude,
-                    longitude: this.data.location.longitude,
-                }).then(trip => {
+                TripService.getTrip(id).then(trip => {
                     lastUpdateDurationSec = trip.current!.timestampSec! - trip.start!.timestampSec!
                     secSinceLastUpdate = 0
                     this.setData({

@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	ImpersonateAccountHeader = "impersonate-account-id"
 	authorizationHeader = "authorization"
 	bearerPrefix = "Bearer "
 
@@ -63,6 +64,14 @@ func (i *interceptor) HandleRequest(ctx context.Context,
 									req interface{},
 									info *grpc.UnaryServerInfo,
 									handler grpc.UnaryHandler) (resp interface{}, err error)  {
+	// 0. 先检查是否加入特殊身份标识
+	//    如果有就相信
+	//    否则从 token 中解出
+	accountID := impersonationFromContext(ctx)
+	if accountID != "" {
+		// fmt.Printf("impersonating %q\n", accountID)
+		return handler(ContextWithAccountID(ctx, id.AccountID(accountID)), req)
+	}
 	// 1. 在这之前已将token加入context
 	//    从最初的context中拿到token
 	tkn, err := tokenFromContext(ctx)
@@ -71,7 +80,7 @@ func (i *interceptor) HandleRequest(ctx context.Context,
 	}
 
 	// 2. 验证token 拿到 accountID
-	accountID, err := i.verifier.Verify(tkn)
+	accountID, err = i.verifier.Verify(tkn)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "token not valid: %v", err)	// 如果没拿到token 后续的解析token的服务不会被执行
 	}
@@ -82,6 +91,19 @@ func (i *interceptor) HandleRequest(ctx context.Context,
 	// 将 accountID 放进context
 	// 把 新的context传下去 才真正交给 trip 的 createTrip执行
 	return handler(ContextWithAccountID(ctx, id.AccountID(accountID)), req)
+}
+
+func impersonationFromContext(c context.Context) string {
+	m, ok := metadata.FromIncomingContext(c)
+	if !ok {
+		return ""
+	}
+
+	imp := m[ImpersonateAccountHeader]
+	if len(imp) == 0 {
+		return ""
+	}
+	return imp[0]
 }
 
 // tokenFromContext 从context中拿到token并返回.

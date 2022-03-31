@@ -121,6 +121,9 @@ func (m *Mongo) UpdateCar(ctx context.Context, id id.CarID, status carpb.CarStat
 	if update.Position != nil {
 		u[positionField] = update.Position
 	}
+	if update.UpdateTripID {
+		u[tripIDField] = update.TripID.String()
+	}
 
 	res := m.col.FindOneAndUpdate(ctx, filter, mgo.Set(u), options.FindOneAndUpdate().SetReturnDocument(options.After))
 	return covertSingResult(res)

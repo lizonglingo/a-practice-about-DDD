@@ -31,6 +31,7 @@ func (m *Manager) Verify(ctx context.Context, cid id.CarID, location *rentalpb.L
 }
 
 func (m *Manager) Unlock(ctx context.Context, cid id.CarID, aid id.AccountID, tid id.TripID, avatarURL string) error {
+	// fmt.Printf("trip id in trip client car.go 34: %s", tid.String())
 	_, err := m.CarService.UnlockCar(ctx, &carpb.UnlockCarRequest{
 		Id: cid.String(),
 		Driver: &carpb.Driver{
