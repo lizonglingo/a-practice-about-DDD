@@ -156,7 +156,7 @@ func (c *Controller) unLockCar(ctx context.Context, car *carpb.CarEntity) (*carp
 	// 开锁之后 汽车开始模拟移动
 	_, err = c.AIService.SimulateCarPos(ctx, &coolenvpb.SimulateCarPosRequest{
 		CarId: car.Id,
-		Type:  coolenvpb.PosType_RANDOM,
+		Type:  coolenvpb.PosType_NINGBO,
 		InitialPos: &coolenvpb.Location{
 			Latitude:  car.Car.Position.Latitude,
 			Longitude: car.Car.Position.Longitude,
