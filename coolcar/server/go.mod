@@ -24,4 +24,5 @@ require (
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
+	sigs.k8s.io/kind v0.8.1 // indirect
 )
