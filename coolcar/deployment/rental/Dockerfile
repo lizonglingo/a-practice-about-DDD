@@ -13,16 +13,16 @@ COPY . /go/src/coolcar/server
 # 这样编译的文件就能在alpine中跑
 # 方案2： 在golang的alpine版本进行编译 直接可在 Linux下运行
 WORKDIR /go/src/coolcar/server
-RUN go install ./gateway/...
+RUN go install ./rental/...
 
 # 将编译后的可执行文件放入新的环境 构建生产镜像 第二阶段
 FROM alpine:3.13
-COPY --from=builder /go/bin/gateway /bin/gateway
+COPY --from=builder /go/bin/rental /bin/rental
 # 所有http暴露在8080 gRPC暴露在9090
-ENV ADDR=:8080
+ENV ADDR=:9090
 
 # 将端口暴露（容器中的端口）有了此端口，可使用 docker run  -p 将这个端口与容器外部端口连接
-EXPOSE 8080
+EXPOSE 9090
 
 # 设置服务入口
-ENTRYPOINT [ "/bin/gateway" ]
+ENTRYPOINT [ "/bin/rental" ]

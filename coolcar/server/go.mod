@@ -16,6 +16,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
 	github.com/medivhzhan/weapp/v2 v2.4.2
 	github.com/mozillazg/go-httpheader v0.3.0 // indirect
+	github.com/namsral/flag v1.7.4-pre // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.34 // indirect

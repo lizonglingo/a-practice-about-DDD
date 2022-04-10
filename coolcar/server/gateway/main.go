@@ -8,6 +8,7 @@ import (
 	"coolcar/shared/auth"
 	"coolcar/shared/server"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/namsral/flag"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"log"
@@ -15,7 +16,16 @@ import (
 	"net/textproto"
 )
 
+var addr = flag.String("addr", ":8123", "address of gateway service to listen")
+var authAddr = flag.String("auth_addr", "localhost:8081", "address of auth service")
+var tripAddr = flag.String("trip_addr", "localhost:8082", "address of trip service")
+var profileAddr = flag.String("profile_addr", "localhost:8082", "address of profile service")
+var carAddr = flag.String("car_addr", "localhost:8084", "address of car service")
+
 func main() {
+	// 解析从命令行中来的参数
+	flag.Parse()
+
 	logger, err := server.NewZapLogger()
 	if err != nil {
 		log.Fatalf("cannot create zap logger %v\n", err)
@@ -45,22 +55,22 @@ func main() {
 	}{
 		{
 			name:         "auth",
-			addr:         "localhost:8081",
+			addr:         *authAddr,
 			registerFunc: authpb.RegisterAuthServiceHandlerFromEndpoint,
 		},
 		{
 			name:         "trip",
-			addr:         "localhost:8082",
+			addr:         *tripAddr,
 			registerFunc: rentalpb.RegisterTripServiceHandlerFromEndpoint,
 		},
 		{
 			name:         "profile",
-			addr:         "localhost:8082",
+			addr:         *profileAddr,
 			registerFunc: rentalpb.RegisterProfileServiceHandlerFromEndpoint,
 		},
 		{
 			name:         "car",
-			addr:         "localhost:8084",
+			addr:         *carAddr,
 			registerFunc: carpb.RegisterCarServiceHandlerFromEndpoint,
 		},
 	}
@@ -71,7 +81,10 @@ func main() {
 			logger.Sugar().Fatalf("cannot register %s service: %v\n", s.name, err)
 		}
 	}
-	addr := ":8123"
-	logger.Sugar().Infof("grpc gateway started at %s\n", addr)
-	logger.Sugar().Fatal(http.ListenAndServe(addr, mux))
+
+	// 抽取配置
+	// addr := ":8123"
+
+	logger.Sugar().Infof("grpc gateway started at %s\n", *addr)
+	logger.Sugar().Fatal(http.ListenAndServe(*addr, mux))
 }

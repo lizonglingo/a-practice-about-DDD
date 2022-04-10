@@ -150,5 +150,96 @@ FROM golang:1.16-alpine
 
 #### Docker的强大功能 —— 多阶段构建
 
+修改后的多阶段构建文件如下：
+
+```dockerfile
+# 启动编译环境 第一阶段
+FROM golang:1.16-alpine AS builder
+
+# 配置编译环境
+RUN go env -w GO111MODULE=on
+RUN go env -w GOPROXY=https://goproxy.cn,direct
+
+# 拷贝源代码到镜像中
+COPY . /go/src/coolcar/server
+
+# 编译 使用跨平台交叉编译
+# CGO_ENABLED涉及到编译过程中如链接等底层内容
+# 这样编译的文件就能在alpine中跑
+WORKDIR /go/src/coolcar/server
+RUN CGO_ENABLED=0 GOOS=linux go install ./gateway/...
+
+# 将编译后的可执行文件放入新的环境 构建生产镜像 第二阶段
+FROM alpine:3.13
+COPY --from=builder /go/bin/gateway /bin/gateway
+
+# 将端口暴露（容器中的端口）有了此端口，可使用 docker run  -p 将这个端口与容器外部端口连接
+EXPOSE 8123
+
+# 设置服务入口
+ENTRYPOINT [ "/bin/gateway" ]
+```
+
+```shell
+> docker image ls
+REPOSITORY                               TAG                                                     IMAGE ID       CREATED              SIZE  
+coolcar/gateway                          latest                                                  421abdba262c   About a minute ago   20.4MB
+```
+
+ 可以发现，新的镜像只有20多MB，相比之前1G轻量化许多。
+
+## 代码中可变参数配置化
+
+在启动服务时，会指定一些地址、端口、用户名等信息，这些数据不能写死在代码中，而是要进行抽取，以用户和配置的在启动服务时注入。
+
+#### 动态配置
+
+- 通过配置服务/数据库更改配置
+- 容易出错
+- 往往难以追溯和回滚
+- 对配置生效的延时要求不同
+
+#### 静态配置
+
+- 被持续集成流程所保护
+- 适用于微服务
+- 配置来源：注意这里的优先级是自上而下的(社区约定俗称的规范)
+  - 命令行参数
+  - 环境变量(在kubernetes中比较提倡使用环境变量注入参数 ，因为有Pod提供隔离环境)
+  - 配置文件：ini格式或yaml格式等
+  - 默认值
+
+使用`"github.com/namsral/flag"`包，将配置参数抽取，可用命令行或环境变量等方式注入。
+
+## 为所有服务制作镜像
+
+参照上面的Dockerfile为每个微服务模块制作镜像，并上传至阿里云仓库。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
