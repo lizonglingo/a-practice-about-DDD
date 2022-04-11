@@ -101,6 +101,7 @@ func (c *Controller) SimulateCar(ctx context.Context, initial *carpb.CarEntity, 
 				// c.Logger.Info("car trip id.", zap.String("trip id in sim 101", update.TripId))
 				updated, err := c.unLockCar(ctx, car)
 				if err != nil {
+					c.Logger.Info(err.Error())
 					c.Logger.Error("cannot unlock car", zap.String("id", car.Id))
 					break	// 跳出case
 				}
@@ -131,6 +132,7 @@ func (c *Controller) lockCar(ctx context.Context, car *carpb.CarEntity) (*carpb.
 		Status: carpb.CarStatus_LOCKED,
 	})
 	if err != nil {
+		c.Logger.Info("lockCar update car error")
 		return nil, fmt.Errorf("cannot update car state: %v", err)
 	}
 
@@ -138,6 +140,7 @@ func (c *Controller) lockCar(ctx context.Context, car *carpb.CarEntity) (*carpb.
 		CarId: car.Id,
 	})
 	if err != nil {
+		c.Logger.Info("end simulate CarPos error")
 		return nil, fmt.Errorf("cannot end simulation: %v", err)
 	}
 
@@ -151,6 +154,7 @@ func (c *Controller) unLockCar(ctx context.Context, car *carpb.CarEntity) (*carp
 		Status: carpb.CarStatus_UNLOCKED,
 	})
 	if err != nil {
+		c.Logger.Info("unlockCar update car error")
 		return nil, fmt.Errorf("cannot update car state: %v", err)
 	}
 	// 开锁之后 汽车开始模拟移动
@@ -163,6 +167,7 @@ func (c *Controller) unLockCar(ctx context.Context, car *carpb.CarEntity) (*carp
 		},
 	})
 	if err != nil {
+		c.Logger.Info("simulate simulate CarPos error")
 		return nil, fmt.Errorf("cannot simulate car position: %v", err)
 	}
 

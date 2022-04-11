@@ -100,7 +100,7 @@ Page({
         success: async () => {
           // 首先查看是否已经通过身份认真 然后决定是否弹出模态框
           const prof = await ProfileService.getProfile()
-          const carID = '62400887f036933536ede0d9'
+          const carID = '624008016fb6dec1ea420df2'
           // const redirectURL: string = `/pages/lock/lock?car_id=${carID}`
           const lockURL: string = routing.lock({
             car_id: carID,
