@@ -223,7 +223,109 @@ coolcar/gateway                          latest                                 
 
 ### 基础配置和部署
 
+#### 创建Secret使集群可以访问私有仓库
 
+Kubernetes手册：
+
+```shell
+kubectl create secret docker-registry myregistrykey --docker-server=DUMMY_SERVER \
+          --docker-username=DUMMY_USERNAME --docker-password=DUMMY_DOCKER_PASSWORD \
+          --docker-email=DUMMY_DOCKER_EMAIL
+```
+
+阿里云手册：
+
+```shell
+kubectl create secret docker-registry [$Reg_Secret] --docker-server=[$Registry] --docker-username=[$Username] --docker-password=[$Password] --docker-email=[$Email]
+```
+
+我用的：
+
+```shell
+root@lzl-a:/# kubectl create secret docker-registry [你的secret名] --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=[$登录阿里云镜像仓库时的用户名] --docker-password=[$对应的pwd]
+secret/lzl-aliyun-reg-secret created
+root@lzl-a:/# kubectl get secrets
+NAME                    TYPE                                  DATA   AGE
+default-token-s9tk7     kubernetes.io/service-account-token   3      102m
+lzl-aliyun-reg-secret   kubernetes.io/dockerconfigjson        1      2m
+```
+
+#### 编写部署文件
+
+以gateway为例：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    app: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: registry.cn-hangzhou.aliyuncs.com/coolcar-lzl/gateway:1.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      imagePullSecrets:
+        - name: lzl-aliyun-reg-secret	# 需要告诉私用仓库的secret信息
+```
+
+部署：
+
+```shell
+root@lzl-a:/home/lzl/WP/coolcar/deployment/gateway# kubectl apply -f gateway.yaml 
+deployment.apps/gateway created
+root@lzl-a:/home/lzl/WP/coolcar/deployment/gateway# kubectl get pods
+NAME                       READY   STATUS    RESTARTS   AGE
+gateway-7f48845d98-mzb45   1/1     Running   0          14s
+```
+
+创建Service，在原有deploy文件追加：
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  selector:
+    app: gateway
+  ports:
+  - protocol: TCP
+    port: 8080
+```
+
+部署Service：
+
+```shell
+root@lzl-a:/home/lzl/WP/coolcar/deployment/gateway# kubectl apply -f gateway.yaml 
+deployment.apps/gateway unchanged
+service/gateway created
+root@lzl-a:/home/lzl/WP/coolcar/deployment/gateway# kubectl get svc
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+gateway      ClusterIP   10.109.122.88   <none>        8080/TCP   5s
+kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP    117m
+root@lzl-a:/home/lzl/WP/coolcar/deployment/gateway# curl 10.109.122.88:8080
+{"code":5,"message":"Not Found"}
+```
+
+到这里可以从集群中访问到该服务了。
 
 ### 调试
 
