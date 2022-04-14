@@ -1,62 +1,74 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway
+  name: rental
   labels:
-    app: gateway
+    app: rental
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gateway
+      app: rental
   template:
     metadata:
       labels:
-        app: gateway
+        app: rental
     spec:
       containers:
-      - name: gateway
-        image: registry.cn-hangzhou.aliyuncs.com/coolcar-lzl/gateway:1.3
+      - name: rental
+        image: registry.cn-hangzhou.aliyuncs.com/coolcar-lzl/rental:1.3
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8080
+        - containerPort: 9090
         resources:
           limits:
             cpu: 100m
             memory: 128Mi
         env:
-          - name: AUTH_ADDR
+          - name: MONGO_URI
             valueFrom:
               configMapKeyRef:
-                key: auth
+                key: mongo
                 name: endpoints
-          - name: TRIP_ADDR
+          - name: AI_ADDR
             valueFrom:
               configMapKeyRef:
-                key: trip
+                key: ai
                 name: endpoints
-          - name: PROFILE_ADDR
+          - name: BLOB_ADDR
             valueFrom:
               configMapKeyRef:
-                key: profile
+                key: blob
                 name: endpoints
           - name: CAR_ADDR
             valueFrom:
               configMapKeyRef:
                 key: car
                 name: endpoints
+          - name: AUTH_PUBLIC_KEY_FILE
+            value: /sec/public.key
+        volumeMounts:
+          - mountPath: /sec
+            name: auth
+            readOnly: true
       imagePullSecrets:
-        - name: lzl-aliyun-reg-secret
+        - name: aliyun-secret
+      volumes:
+        - name: auth
+          secret:
+            secretName: auth
+            items:
+              - key: publickey
+                path: public.key
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gateway
+  name: rental
 spec:
   selector:
-    app: gateway
+    app: rental
   ports:
   - protocol: TCP
-    targetPort: 8080
-    port: 8080
-  type: LoadBalancer
+    port: 9090
+  type: ClusterIP

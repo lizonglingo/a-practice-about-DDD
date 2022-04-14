@@ -250,6 +250,21 @@ default-token-s9tk7     kubernetes.io/service-account-token   3      102m
 lzl-aliyun-reg-secret   kubernetes.io/dockerconfigjson        1      2m
 ```
 
+> 这里发现一个问题，我配置好之后发现实际上是无法访问阿里云容器仓库的，但是我配置用户名、密码、仓库地址都没问题。
+>
+> 然后看到说是DNS问题，我在本地虚拟机的DNS并不是8.8.8.8这种，而是本地的一个虚拟网关，然后按照：https://blog.csdn.net/booklijian/article/details/116491288 修改DNS进行尝试。
+>
+> 可能是由于网络的原因，在另一台虚拟机上发现没有修改DNS也可以正常ping通阿里云镜像仓库。
+
+**注意：这里有两种方式使secret生效**：
+
+1. 在Pod部署文件中，通过`imagePullSecrets`字段显示将secret用于这次部署；
+2. 将`ImagePullSecrets`添加到服务账号：
+
+![image-20220413141432435](https://picgo-lzl.oss-cn-beijing.aliyuncs.com/image-20220413141432435.png)
+
+> https://kubernetes.io/zh/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account
+
 #### 编写部署文件
 
 以gateway为例：
@@ -325,15 +340,90 @@ root@lzl-a:/home/lzl/WP/coolcar/deployment/gateway# curl 10.109.122.88:8080
 {"code":5,"message":"Not Found"}
 ```
 
-到这里可以从集群中访问到该服务了。
+到这里可以从集群中访问到该服务了。如果想在集群外访问，就按照前面的文章，开一个NodePort即可。
 
 ### 调试
 
+涉及到调试的点大致有以下：
 
+- Pod的启动过程
+- 查看服务状态
+- 查看启动时间
+- 查看日志
 
+#### 查看Pod启动信息
 
+- `kubectl describe pod ${POD_NAME} `
+
+#### 查看Pod中运行的应用日志
+
+- `kubectl logs ${POD_NAME}`
+  - `-f`：使用该参数，log界面不会退出，持续将终端作为应用日志的输出位置；不加该参数则在终端输出所有日志后返回。
+  - `-p / --previous`：有时候服务跑着就挂了，前面的日志看不到，就可以使用该参数看到之前的日志。
+
+可以看到运行在Pod中的应用打印在sysout的日志。
 
 ### 进阶配置
+
+#### ConfigMap
+
+用于做一些常规的配置，例如某个服务的地址，端口号等，如下：
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: endpoints
+data:
+  auth: auth:8081
+```
+
+如果要使用里面的值，需要在部署Pod的文件中的`spec`中指定：
+
+```yaml
+spec:
+      containers:
+      - name: auth
+        image: xxxx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9090
+        env:
+          - name: AUTH_ADDR # 例如这里环境变量需要使用ConfigMap
+            valueFrom:	
+              configMapKeyRef:
+                key: auth
+                name: endpoints	# configmap的名字
+```
+
+#### Secret
+
+用来存放一些敏感数据：
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wechat
+type: Opaque
+stringData:		# 如果这里的类型是data则需要存放base64编码的二进制数据
+  appid: xxxxx
+  appsecret: xxxxx
+```
+
+使用方法和ConfigMap大致相同：
+
+```yaml
+spec:
+        env:
+          - name: WECHAT_APP_ID
+            valueFrom:
+              secretKeyRef:
+                key: appid
+                name: wechat
+```
+
+
 
 
 

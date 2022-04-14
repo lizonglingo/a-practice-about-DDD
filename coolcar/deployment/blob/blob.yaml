@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blob
+  labels:
+    app: blob
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blob
+  template:
+    metadata:
+      labels:
+        app: blob
+    spec:
+      containers:
+      - name: blob
+        image: registry.cn-hangzhou.aliyuncs.com/coolcar-lzl/blob:1.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9090
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        env:
+          - name: MONGO_URI
+            valueFrom:
+              configMapKeyRef:
+                key: mongo
+                name: endpoints
+          - name: OSS_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                key: ossendpoint
+                name: oss
+          - name: OSS_AKID
+            valueFrom:
+              secretKeyRef:
+                key: ossakid
+                name: oss
+          - name: OSS_AKSEC
+            valueFrom:
+              secretKeyRef:
+                key: ossaksec
+                name: oss
+          - name: OSS_BUCKETNAME
+            valueFrom:
+              secretKeyRef:
+                key: ossbucketname
+                name: oss
+      imagePullSecrets:
+        - name: aliyun-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blob
+spec:
+  selector:
+    app: blob
+  ports:
+  - protocol: TCP
+    port: 9090
+  type: ClusterIP
