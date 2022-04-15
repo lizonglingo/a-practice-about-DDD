@@ -22,7 +22,7 @@ spec:
         - containerPort: 8080
         resources:
           limits:
-            cpu: 100m
+            cpu: 30m
             memory: 128Mi
         env:
           - name: AUTH_ADDR
@@ -45,6 +45,12 @@ spec:
               configMapKeyRef:
                 key: car
                 name: endpoints
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
       imagePullSecrets:
         - name: lzl-aliyun-reg-secret
 ---

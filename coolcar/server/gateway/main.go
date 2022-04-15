@@ -7,6 +7,7 @@ import (
 	rentalpb "coolcar/rental/api/gen/v1"
 	"coolcar/shared/auth"
 	"coolcar/shared/server"
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/namsral/flag"
 	"google.golang.org/grpc"
@@ -25,6 +26,8 @@ var carAddr = flag.String("car_addr", "localhost:8084", "address of car service"
 func main() {
 	// 解析从命令行中来的参数
 	flag.Parse()
+
+	fmt.Printf("addr: %s\n authaddr: %s\n tripaddr: %s\n profileaddr: %s\n caraddr: %s\n", *addr, *authAddr, *tripAddr, *profileAddr, *carAddr)
 
 	logger, err := server.NewZapLogger()
 	if err != nil {
@@ -85,6 +88,13 @@ func main() {
 	// 抽取配置
 	// addr := ":8123"
 
+	// 添加健康检查
+	http.HandleFunc("/healthz", func(resp http.ResponseWriter, req *http.Request) {
+		resp.Write([]byte("OK"))
+	})
+	// 将 gRPC mux 包装到 defaultmux中
+	http.Handle("/", mux)
+
 	logger.Sugar().Infof("grpc gateway started at %s\n", *addr)
-	logger.Sugar().Fatal(http.ListenAndServe(*addr, mux))
+	logger.Sugar().Fatal(http.ListenAndServe(*addr, nil))
 }

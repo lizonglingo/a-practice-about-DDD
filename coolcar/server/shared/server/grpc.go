@@ -4,6 +4,8 @@ import (
 	"coolcar/shared/auth"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 )
 
@@ -38,6 +40,9 @@ func RunGRPCServer(c *GRPCConfig) error {
 	// 在初始化gRPC服务时需要为该gRPC服务设置拦截器
 	s := grpc.NewServer(gRPCOpts...)
 	c.RegisterFunc(s)
+
+	// 添加gRPC健康检查
+	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
 
 	c.Logger.Info("server started", nameField, zap.String("addr", c.Addr))
 	return s.Serve(listener)

@@ -15,9 +15,13 @@ COPY . /go/src/coolcar/server
 WORKDIR /go/src/coolcar/server
 RUN go install ./auth/...
 
+# 安装 grpc-health-probe
+RUN go get github.com/grpc-ecosystem/grpc-health-probe
+
 # 将编译后的可执行文件放入新的环境 构建生产镜像 第二阶段
 FROM alpine:3.13
 COPY --from=builder /go/bin/auth /bin/auth
+COPY --from=builder /go/bin/grpc-health-probe /bin/grpc-health-probe
 # 所有http暴露在8080 gRPC暴露在9090
 ENV ADDR=:9090
 

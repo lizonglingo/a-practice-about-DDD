@@ -14,6 +14,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
+	github.com/grpc-ecosystem/grpc-health-probe v0.4.10 // indirect
 	github.com/medivhzhan/weapp/v2 v2.4.2
 	github.com/mozillazg/go-httpheader v0.3.0 // indirect
 	github.com/namsral/flag v1.7.4-pre // indirect
@@ -23,7 +24,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.4
 	go.uber.org/zap v1.21.0
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
-	google.golang.org/grpc v1.44.0
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/grpc v1.45.0
+	google.golang.org/protobuf v1.28.0
 	sigs.k8s.io/kind v0.8.1 // indirect
 )
