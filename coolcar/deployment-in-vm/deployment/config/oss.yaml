@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oss
+type: Opaque
+stringData:
+  ossendpoint: oss-cn-beijing.aliyuncs.com
+  ossakid: LTAI5tLK8Ckc7uPgkxTFh5aB
+  ossaksec: f8gUt8suANRC3pSriJ6eHak6Qivt1F
+  ossbucketname: coolcar-lzl

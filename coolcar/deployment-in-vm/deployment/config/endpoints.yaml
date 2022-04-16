@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: endpoints
+data:
+  mongo: mongodb://coolenv:27017
+  amqp: amqp://guest:guest@coolenv:5672/
+  ai: coolenv:18001
+  auth: auth:9090
+  car: car:9090
+  blob: blob:9090
+  trip: rental:9090
+  profile: rental:9090
+

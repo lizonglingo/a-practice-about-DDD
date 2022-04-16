@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  labels:
+    app: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+        version: v1.4
+    spec:
+      containers:
+      - name: auth
+        image: registry.cn-hangzhou.aliyuncs.com/coolcar-lzl/auth:1.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9090
+        resources:
+          limits:
+            cpu: 30m
+            memory: 128Mi
+        env:
+          - name: MONGO_URI
+            valueFrom:
+              configMapKeyRef:
+                key: mongo
+                name: endpoints
+          - name: WECHAT_APP_ID
+            valueFrom:
+              secretKeyRef:
+                key: appid
+                name: wechat
+          - name: WECHAT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: appsecret
+                name: wechat
+          - name: PRIVATE_KEY_FILE
+            value: /sec/private.key
+        volumeMounts:
+          - mountPath: /sec
+            name: auth
+            readOnly: true
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc-health-probe", "-addr=:9090"]
+          initialDelaySeconds: 5
+      imagePullSecrets:
+        - name: aliyun-secret
+      volumes:
+        - name: auth
+          secret:
+            secretName: auth
+            items:
+              - key: privatekey
+                path: private.key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+spec:
+  selector:
+    app: auth
+  ports:
+  - name: grpc
+    protocol: TCP
+    port: 9090
+  type: ClusterIP

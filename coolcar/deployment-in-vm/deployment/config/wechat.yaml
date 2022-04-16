@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wechat
+type: Opaque
+stringData:
+  appid: wx107c630a825fa6ff
+  appsecret: 968274be809f6ada2f0d0b9f21a6f8f7

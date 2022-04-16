@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: auth
+type: Opaque
+stringData:
+  privatekey: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEoQIBAAKCAQB9SwXEmlrc/ha6IGhKmcvPGV9pFJ9e8EIjXqKrN4P4K/p8udtv
+    96gCv/3WhGV747rCCR0HvDIrz2e0ZEfDnc3m38son9hsZxM2YRX3qztoWhriBEAG
+    Uch/u9F4/hVLNzfc4RqGnCZoxQkqwFOxXGX6TVsMVHaUMKvGISMA9quoodV2PHV1
+    XBb47b/M6piCSa75oSKwKPDReMgwvxJwEQVGfS77d7jtTRpZQvONkLykJQ2p+BNF
+    QUqK3Jz9eO0gynn9NKFOrghUI4tqHY1gDH+3AS4U/vzUrW64YsJgUA3WGGAd8K+n
+    YL1St8rZkQTLrqMDZMa376ow60m23LJmVLkxAgMBAAECggEAZUINfk+U4YdEDNaG
+    Esxqx4vk7QKqrkqT2QvxgVhTgmzgeo6mRr4q/VX2qrjDX7WzSH+fA5JYJcnwMPze
+    dryBHHZ/NOzCNxGymD8sRsYPNA2mLkVrDPBpjrnW1+bYhLoynoMaMfHepMug1fkr
+    amqXTAvaaoOUdb1EBdLf/DZekuBTr3cwre9VYCpxqKc8ysbZCwQczjFS3/slIDIA
+    GFnn5JB/6/7Jw0oY9QScJ4eSzsbFaKAvQ9A73izJrwQ2musbdyby5tC/n5knfYpv
+    wXwLKTGhfGJcn8vpC1hLiH5tJv1TZNIioVdh+GEPTkKT5IPugzsgcm8cssFo7T6e
+    BV2ExQKBgQDqPMh4Oe1n+42yev/U4zFdc0MSpOEJSBSAivB6b10sitvTnL3wNLjG
+    9kGe2xQO5J0R5Ndpr3NtoPxrAT07CfwYeM3syQQ8O07qpelHImhxey671xf6F/ML
+    YQ7ZdUK7bwdqVdA4+nFQ2rF8gs0ZhaMFLqvM4mzkYS46W1Un/myZwwKBgQCI7w2v
+    Zk3r4NXAIqC0dsMd0qbkle48OIstq+RBbO+4qn+4FN+BQ5GadMoPcGRRHCLOMHgh
+    9eTo+Iv28RBRYdYMtZ4UuNc+UBxsL4AyGHuXndWYJmJGvzgyZuO9/nLWzmRWwM53
+    yiwcMT/R5ulqaRBmxK6sNklyuywFfUwzMAe9+wKBgF5YnzJ1up8AXoF+M19vJyoJ
+    zAFNcerIIqHn1JasFm5je8mPP53pzmctNx8iBME+6dkUQIOsDKUii6kZ9ay7B9Rf
+    jCoMiW0tQksXCpABVuomgJteNqUgUl/J9y41oexW+zikWdspXM0BWS3ajXvzLMdg
+    lghPRybx0anlsbYLL3j7AoGAYT7TyzKuN8uOQUrWMhL9chp9Z2yKqb3GKYMfMM96
+    VvzOgx5fs98WckhqjxhURb3jgeauCgAktsZ8L7z2x7ThXFlGkJTMV3ZxGOuK8Qiu
+    DPiMDeeEd5WpBTJInk8rox0j6PA4MJ4lQUhAeIKyVV2Txkf7fFV5R79g/e0Dxn5f
+    oS0CgYBmk5q5BWOlNSGLNvgWo5t0HKRbFPbQ1oojxyXubzU+PruEDVnHEdMbXaHy
+    4P/su/jBLVCYvBSB07d+ve/yxpcxrFwXtTAONGV1NaWD97GwJUezoIvN6PspUzVc
+    TN1HALUteSGYwxHOH38kc2boMwNpZESsRBZ8CPU8JPkBA0UCVw==
+    -----END RSA PRIVATE KEY-----
+  publickey: |
+    -----BEGIN PUBLIC KEY-----
+    MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQB9SwXEmlrc/ha6IGhKmcvP
+    GV9pFJ9e8EIjXqKrN4P4K/p8udtv96gCv/3WhGV747rCCR0HvDIrz2e0ZEfDnc3m
+    38son9hsZxM2YRX3qztoWhriBEAGUch/u9F4/hVLNzfc4RqGnCZoxQkqwFOxXGX6
+    TVsMVHaUMKvGISMA9quoodV2PHV1XBb47b/M6piCSa75oSKwKPDReMgwvxJwEQVG
+    fS77d7jtTRpZQvONkLykJQ2p+BNFQUqK3Jz9eO0gynn9NKFOrghUI4tqHY1gDH+3
+    AS4U/vzUrW64YsJgUA3WGGAd8K+nYL1St8rZkQTLrqMDZMa376ow60m23LJmVLkx
+    AgMBAAE=
+    -----END PUBLIC KEY-----
