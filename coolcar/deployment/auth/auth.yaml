@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: auth
+        version: v1.3
     spec:
       containers:
       - name: auth
@@ -64,6 +65,7 @@ spec:
   selector:
     app: auth
   ports:
-  - protocol: TCP
+  - name: grpc
+    protocol: TCP
     port: 9090
   type: ClusterIP
