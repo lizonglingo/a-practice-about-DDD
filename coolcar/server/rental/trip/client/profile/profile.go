@@ -17,6 +17,18 @@ type Manager struct {
 	Fetcher Fetcher
 }
 
+// Verify 验证驾驶证信息是否已被审核.
+//  message Identity {
+//  string  lic_number = 1;
+//  string name = 2;
+//  Gender gender = 3;
+//  int64 brith_date_millis = 4;
+//  }
+//
+// message Profile {
+//  Identity identity = 1;
+//  IdentityStatus identity_status = 2;
+// }
 func (m *Manager) Verify(ctx context.Context, aid id.AccountID) (id.IdentityID, error) {
 	nilID := id.IdentityID("")
 	p, err := m.Fetcher.GetProfile(ctx, &rentalpb.GetProfileRequest{})

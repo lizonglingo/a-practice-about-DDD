@@ -52,11 +52,9 @@ func main() {
 	c := context.Background()
 	// mongoClient, err := mongo.Connect(c, options.Client().ApplyURI("mongodb://localhost:27017/coolcar?readPreference=primary&ssl=false"))
 	mongoClient, err := mongo.Connect(c, options.Client().ApplyURI(*mongoURI))
-
 	if err != nil {
 		logger.Fatal("cannot connect mongodb", zap.Error(err))
 	}
-
 	db := mongoClient.Database("coolcar")
 
 	// blobConn, err := grpc.Dial("localhost:8083", grpc.WithInsecure())

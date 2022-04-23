@@ -43,6 +43,7 @@ type DistanceCalc interface {
 	DistanceKm(context.Context, *rentalpb.Location, *rentalpb.Location) (float64, error)
 }
 
+// CreateTrip 创建一个行程 返回一个 TripEntity和一个Error.
 func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRequest) (*rentalpb.TripEntity, error) {
 	// 验证身份
 	aid, err := auth.AccountIDFromContext(ctx)
@@ -50,11 +51,12 @@ func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRe
 		return nil, err
 	}
 
+	// 需要知道CarID和起始地点
 	if request.CarId == "" || request.Start == nil {
 		return nil, status.Error(codes.InvalidArgument, "")
 	}
 
-	// 验证驾驶者身份
+	// 验证驾驶者身份，看是否驾照通过审核
 	iID, err := s.ProfileManager.Verify(ctx, aid)
 	if err != nil {
 		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
@@ -62,17 +64,27 @@ func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRe
 
 	// 检查车辆状态 防止车辆被占用
 	carID := id.CarID(request.CarId)
+	// 查看车辆是否处于可开锁状态
 	err = s.CarManager.Verify(ctx, carID, request.Start)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
 
+	// 计算当前车辆状态
+	// message LocationStatus {
+	//  Location location = 1;
+	//  int32 fee_cent = 2;
+	//  double km_driven = 3;
+	//  string poi_name = 4;
+	//  int64 timestamp_sec = 5;
+	// }
 	ls := s.calcCurrentStatus(ctx, &rentalpb.LocationStatus{
 		Location:     request.Start,
 		TimestampSec: nowFunc(),
 	}, request.Start)
 
 	// 创建行程 写入数据库
+	// 先写库 再 开锁
 	trip, err := s.Mongo.CreateTrip(ctx, &rentalpb.Trip{
 		AccountId:  aid.String(),
 		CarId:      carID.String(),
@@ -86,7 +98,7 @@ func (s *Service) CreateTrip(ctx context.Context, request *rentalpb.CreateTripRe
 		return nil, status.Error(codes.AlreadyExists, "")
 	}
 
-	// 开锁		后做 如果先开锁，开锁成功但创建行程失败了呢？
+	// 开锁后做 如果先开锁，开锁成功但创建行程失败了呢？
 	// 不需要等到开完锁再告诉用户开锁成功
 	go func() {
 		err = s.CarManager.Unlock(context.Background(), carID, aid, objid.ToTripID(trip.ID),request.AvatarUrl)

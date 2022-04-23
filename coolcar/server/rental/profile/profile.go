@@ -24,6 +24,7 @@ type Service struct {
 }
 
 func (s *Service) GetProfile(ctx context.Context, request *rentalpb.GetProfileRequest) (*rentalpb.Profile, error) {
+	// 从context拿accountID
 	aid, err := auth.AccountIDFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -64,7 +65,7 @@ func (s *Service) SubmitProfile(ctx context.Context, identity *rentalpb.Identity
 	// 模拟审核
 	go func() {
 		time.Sleep(3 * time.Second)
-		// 注意context的使用
+		// 注意context的使用 这里启用一个新的context
 		err := s.Mongo.UpdateProfile(context.Background(), aid, &rentalpb.Profile{
 			Identity:       identity,
 			IdentityStatus: rentalpb.IdentityStatus_VERIFIED,

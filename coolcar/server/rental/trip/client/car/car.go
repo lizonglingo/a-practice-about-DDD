@@ -12,6 +12,7 @@ type Manager struct {
 	CarService carpb.CarServiceClient
 }
 
+// Verify 验证车辆状态是否处于可开锁状态.
 func (m *Manager) Verify(ctx context.Context, cid id.CarID, location *rentalpb.Location) error {
 	// 通过 carID 找到需要验证的车
 	car, err := m.CarService.GetCar(ctx, &carpb.GetCarRequest{
