@@ -31,8 +31,11 @@ func Handler(u *websocket.Upgrader, sub mq.Subscriber, logger *zap.Logger) http.
 			return
 		}
 		defer cleanUp()
+		
 
-		done := make(chan struct{}) // 用来通知在连接挂掉后不再发消息
+		// 用来通知在连接挂掉后不再发消息
+		// 保持对连接可靠性的监控
+		done := make(chan struct{})
 		go func() {
 			for {
 				_, _, err := conn.ReadMessage()
@@ -48,7 +51,7 @@ func Handler(u *websocket.Upgrader, sub mq.Subscriber, logger *zap.Logger) http.
 			}
 		}()
 
-
+		// 持续从rabbitMQ中收取消息
 		for {
 			select {
 			case msg := <- msgs:

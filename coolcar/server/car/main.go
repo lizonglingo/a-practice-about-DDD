@@ -45,12 +45,15 @@ func main() {
 	c := context.Background()
 	// mongoClient, err := mongo.Connect(c, options.Client().ApplyURI("mongodb://localhost:27017/coolcar?readPreference=primary&ssl=false"))
 	mongoClient, err := mongo.Connect(c, options.Client().ApplyURI(*mongoURI))
-
 	if err != nil {
 		logger.Fatal("cannot connect mongodb", zap.Error(err))
 	}
 	db := mongoClient.Database("coolcar")
 
+	// exchange coolcar 用于
+	// - 从Car Service中接收开锁、移动指令
+	// - 将开锁指令传给Car Simulation模拟开锁
+	// - 将位置移动传给Trip Updator改变汽车位置
 	exchange := "coolcar"
 	// amqpConn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	amqpConn, err := amqp.Dial(*amqpURL)
@@ -75,20 +78,25 @@ func main() {
 	if err != nil {
 		logger.Fatal("cannot connect to ai service: %v", zap.Error(err))
 	}
+
+	// 订阅 coolcar
 	sub, err := amqpclt.NewSubscriber(amqpConn, exchange, logger)
 	if err != nil {
 		logger.Fatal("cannot create car subscribe: %v", zap.Error(err))
 	}
+	// 订阅 pos_sim
 	posSub, err := amqpclt.NewSubscriber(amqpConn, "pos_sim", logger)
 	if err != nil {
 		logger.Fatal("cannot create pos subscribe: %v", zap.Error(err))
 	}
+
+	// 在新的routine中开始模拟
 	simController := &sim.Controller{
 		CarService:    carpb.NewCarServiceClient(carConn),
 		AIService:     coolenvpb.NewAIServiceClient(aiConn),
 		Logger:        logger,
-		CarSubscriber: sub,
-		PosSubscriber: &pos.Subscriber{
+		CarSubscriber: sub,		// 需要从CarSub中得知自己要开锁、模拟哪一辆车
+		PosSubscriber: &pos.Subscriber{	// 需要从PosSub中得到车的变动位置
 			Sub:    posSub,
 			Logger: logger,
 		},

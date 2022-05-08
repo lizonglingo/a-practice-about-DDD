@@ -24,8 +24,10 @@ type Controller struct {
 }
 
 func (c *Controller) RunSimulations(ctx context.Context) {
+	// 首先获取所有的汽车
 	var cars []*carpb.CarEntity
-	for {
+	for {	// 在没有连到Server时进行重试
+		// 等待3s 以免CarService Server没有启动
 		time.Sleep(3 * time.Second)
 		res, err := c.CarService.GetCats(ctx, &carpb.GetCarsRequest{})
 		if err != nil {
@@ -88,6 +90,7 @@ func (c *Controller) RunSimulations(ctx context.Context) {
 }
 
 // SimulateCar goroutine 在开启后 等待channel中来消息进行处理.
+// 每个car对应一个car simulation
 func (c *Controller) SimulateCar(ctx context.Context, initial *carpb.CarEntity, carCh chan *carpb.Car, posCh chan *carpb.Location) {
 	car := initial
 	c.Logger.Info("Simulating car.", zap.String("id", car.Id))
